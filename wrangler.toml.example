@@ -1,0 +1,114 @@
+# Example configuration. Copy to wrangler.toml and replace all placeholder values.
+# Never deploy this template against the original GamePinned account.
+name = "gamepinned-backend"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[vars]
+# Note: Sensitive keys (SIGNING_KEY, POLAR_WEBHOOK_SECRET, RESEND_API_KEY)
+# are stored as encrypted secrets, NOT here.
+# Set them using: wrangler secret put KEY_NAME
+
+# ── Trial system ─────────────────────────────────────────────────────────────
+TRIAL_DAYS = "30"        # Trial length in days
+TRIAL_ENABLED = "true"   # Master switch: set to "false" to disable public trial creation
+TRIAL_SEATS = "1"        # Default seat count per trial (1 PC)
+
+# Days before trial expiry to send reminder emails (reminder 1 = early, reminder 2 = final)
+TRIAL_REMINDER_1_DAYS = "3"
+TRIAL_REMINDER_2_DAYS = "1"
+
+# Days after trial start to send nurture emails (day 7 = onboarding, day 20 = upgrade push)
+TRIAL_NURTURE_DAY1 = "7"
+TRIAL_NURTURE_DAY2 = "20"
+
+# ── Subscription billing ──────────────────────────────────────────────────────
+# Days added to expiry on renewal (monthly and yearly Polar products)
+SUBSCRIPTION_MONTHLY_DAYS = "30"
+SUBSCRIPTION_YEARLY_DAYS = "365"
+
+# Sentinel seat count written to DB for "unlimited" products
+UNLIMITED_SEATS = "999"
+
+# ── Expiry + churn alerts ─────────────────────────────────────────────────────
+# Days before expiry that sync.ts sends an expiry warning email to the customer
+EXPIRY_WARNING_DAYS = "7"
+
+# Days of inactivity before a paid install is flagged as churned
+CHURN_INACTIVE_DAYS = "7"
+
+# How many days to wait before sending another churn alert for the same batch
+CHURN_DEDUP_DAYS = "7"
+
+# ── Operational limits ────────────────────────────────────────────────────────
+# Maximum installer file size allowed in the admin upload form (MB)
+MAX_UPDATE_FILE_MB = "100"
+
+# Days of history returned by the download analytics endpoint
+ANALYTICS_LOOKBACK_DAYS = "30"
+
+# Minutes a presigned download token remains valid (admin panel "Download" button)
+DOWNLOAD_TOKEN_TTL_MINUTES = "15"
+
+# Manual diagnostic reports and their R2 objects are deleted by the daily cron after this many days.
+DIAGNOSTIC_RETENTION_DAYS = "30"
+
+# ── Site + pricing (used in outgoing emails) ──────────────────────────────────
+ADMIN_EMAIL = "admin@example.com"
+SITE_URL = "https://example.com"
+PRICING_PRO_MONTHLY = "$1.99/month per PC"    # Used in trial reminder + nurture emails
+PRICING_ELITE = "from $699 one-time"          # Used in trial reminder + nurture emails
+
+# ── Polar product configuration ───────────────────────────────────────────────
+# Polar product IDs for portal products
+POLAR_PRODUCT_TRIAL = "REPLACE_WITH_POLAR_PRODUCT_ID"
+POLAR_PRODUCT_PRO_MONTHLY = "REPLACE_WITH_POLAR_PRODUCT_ID"
+POLAR_PRODUCT_PRO_ANNUAL = "REPLACE_WITH_POLAR_PRODUCT_ID"
+POLAR_PRODUCT_ELITE_STANDARD = "REPLACE_WITH_POLAR_PRODUCT_ID"
+POLAR_PRODUCT_ELITE_MAX = "REPLACE_WITH_POLAR_PRODUCT_ID"
+ELITE_STANDARD_SEATS = "30"
+ELITE_MAX_SEATS = "200"
+
+# ── Rate limits ───────────────────────────────────────────────────────────────
+# JSON object: { "endpoint": { "maxAttempts": N, "windowMinutes": N, "blockMinutes": N } }
+# Change any value here without redeploying code.
+# DEFAULT_LIMIT applies to any endpoint not listed.
+RATE_LIMIT_CONFIG = '{ "/admin/login": { "maxAttempts": 5, "windowMinutes": 15, "blockMinutes": 30 }, "/api/admin": { "maxAttempts": 5, "windowMinutes": 15, "blockMinutes": 30 }, "/api/activate": { "maxAttempts": 10, "windowMinutes": 5, "blockMinutes": 15 }, "/webhook/polar": { "maxAttempts": 20, "windowMinutes": 5, "blockMinutes": 15 }, "/api/feedback": { "maxAttempts": 5, "windowMinutes": 10, "blockMinutes": 30 }, "DEFAULT": { "maxAttempts": 50, "windowMinutes": 5, "blockMinutes": 10 } }'
+
+[[ratelimits]]
+name = "PUBLIC_SYNC_DIAGNOSTIC_IP_RATE_LIMIT"
+namespace_id = "REPLACE_WITH_RATE_LIMIT_ID_1"
+simple = { limit = 80, period = 60 }
+
+[[ratelimits]]
+name = "SYNC_HARDWARE_RATE_LIMIT"
+namespace_id = "REPLACE_WITH_RATE_LIMIT_ID_2"
+simple = { limit = 3, period = 60 }
+
+[[ratelimits]]
+name = "DIAGNOSTIC_HARDWARE_RATE_LIMIT"
+namespace_id = "REPLACE_WITH_RATE_LIMIT_ID_3"
+simple = { limit = 2, period = 60 }
+
+[[d1_databases]]
+binding = "DB"
+database_name = "example-gamepinned-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[triggers]
+crons = ["0 10 * * *"]  # Daily at 10:00 UTC — sends trial reminder emails
+
+[observability]
+enabled = true
+head_sampling_rate = 1.0
+
+[[r2_buckets]]
+binding = "UPDATES_BUCKET"
+bucket_name = "example-gamepinned-updates"
+

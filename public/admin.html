@@ -1,0 +1,3679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamePinned | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            /* New design tokens */
+            --bg:            #0C0C0C;
+            --surface:       #141414;
+            --surface-2:     #1A1A1A;
+            --surface-3:     #202020;
+            --border:        rgba(255,255,255,0.06);
+            --border-strong: rgba(255,255,255,0.12);
+            --red:           #E60012;
+            --red-dim:       rgba(230,0,18,0.08);
+            --red-hover:     #FF1A28;
+            --text:          #F0F0F0;
+            --text-2:        #888888;
+            --text-3:        #444444;
+            --green:         #22C55E;
+            --green-dim:     rgba(34,197,94,0.1);
+            --amber:         #F59E0B;
+            --amber-dim:     rgba(245,158,11,0.1);
+            --blue:          #3B82F6;
+            --purple:        #A855F7;
+            --radius:        8px;
+            --radius-lg:     12px;
+            --transition:    all 0.15s ease;
+            /* Legacy aliases — kept for inline styles in HTML */
+            --primary:          #E60012;
+            --primary-variant:  #CC0010;
+            --background:       #0C0C0C;
+            --glass:            rgba(255,255,255,0.04);
+            --glass-border:     rgba(255,255,255,0.06);
+            --accent-red:       rgba(230,0,18,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 220px;
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--glass-border);
+            padding: 0;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            display: flex;
+        }
+
+        .logo-container {
+            padding: 22px 20px 18px;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 6px;
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--red);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 0;
+        }
+
+        .nav-section-label {
+            padding: 14px 20px 5px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-3);
+        }
+
+        .nav-item {
+            padding: 9px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-2);
+            font-size: 0.875rem;
+        }
+
+        .nav-item:hover {
+            background: var(--surface-3);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--accent-red);
+            border-left-color: var(--red);
+            color: var(--text);
+        }
+
+        .nav-icon {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            opacity: 0.75;
+        }
+
+        .nav-item.active .nav-icon { opacity: 1; }
+
+        .sidebar-logout {
+            padding: 14px 20px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        /* MAIN CONTENT */
+        .main-wrapper {
+            margin-left: 220px;
+            padding: 24px 28px;
+            min-height: 100vh;
+            display: none;
+        }
+
+        .main-wrapper.active {
+            display: block;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* PAGES */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARDS & STATS */
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1300px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .stat-card {
+            text-align: left;
+            padding: 20px 20px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-2);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* TABLES */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-3);
+            border-bottom: 1px solid var(--glass-border);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: transparent;
+        }
+
+        td {
+            padding: 11px 12px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        tr:hover td {
+            background: var(--surface-3);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 9px 18px;
+            background: var(--red);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--red-hover);
+        }
+
+        .btn-small {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .btn-secondary {
+            background: var(--surface-3);
+            color: var(--text-2);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: #282828;
+            color: var(--text);
+        }
+
+        .btn-error {
+            background: rgba(239,68,68,0.12);
+            color: #EF4444;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+
+        .btn-error:hover {
+            background: rgba(239,68,68,0.22);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-active {
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .badge-inactive {
+            background: rgba(239,68,68,0.12);
+            color: #EF4444;
+        }
+
+        .badge-pro {
+            background: var(--red-dim);
+            color: var(--red);
+        }
+
+        .badge-trial {
+            background: var(--amber-dim);
+            color: var(--amber);
+        }
+
+        /* INPUTS */
+        input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+            width: 100%;
+            padding: 9px 13px;
+            background: var(--surface-2);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 0.875rem;
+            margin-bottom: 13px;
+            transition: var(--transition);
+        }
+
+        input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--border-strong);
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 0;
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            color: var(--red);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        /* Health dot indicators */
+        .health-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+        .health-green  { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.6); }
+        .health-yellow { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.6); }
+        .health-red    { background: #EF4444;       box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+
+        /* Notes icon indicator */
+        .note-icon {
+            display: inline-block;
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.5;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+        .note-icon.has-note { opacity: 1; color: #FFA726; }
+
+        /* Global search overlay */
+        #global-search-bar {
+            background: var(--surface-2);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            color: var(--text);
+            padding: 8px 14px;
+            font-size: 0.875rem;
+            width: 260px;
+            margin-bottom: 0;
+        }
+        #global-search-bar:focus { border-color: var(--border-strong); outline: none; }
+
+        #search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 420px;
+            max-height: 360px;
+            overflow-y: auto;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            z-index: 3000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            display: none;
+        }
+        .search-result-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .search-result-item:hover { background: var(--surface-2); }
+        .search-result-item:last-child { border-bottom: none; }
+
+        /* Diagnostic log modal */
+        #diag-log-modal .modal-content {
+            max-width: 800px;
+            width: 95%;
+        }
+        #diag-log-content {
+            background: #0a0a0f;
+            color: #c0ffc0;
+            font-family: monospace;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            padding: 16px;
+            border-radius: 6px;
+            max-height: 55vh;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border: 1px solid var(--glass-border);
+            margin-top: 12px;
+        }
+
+        /* Notes modal textarea */
+        #notes-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Expiring-month section */
+        .expiring-row-extend { padding: 4px 10px; font-size: 0.8rem; }
+
+        /* =====================================================================
+           RESPONSIVE / MOBILE LAYOUT
+           ===================================================================== */
+
+        /* Hamburger toggle — hidden on desktop, shown via media query on mobile */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 4px;
+            color: var(--text);
+            flex-direction: column;
+            gap: 5px;
+            flex-shrink: 0;
+            align-self: center;
+        }
+        .hamburger-btn span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        /* Semi-transparent backdrop that appears behind the sidebar on mobile */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 1050;
+        }
+
+        /* Two-column chart grid — replaces the inline grid styles so media
+           queries can collapse them to one column on narrow screens */
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Top-bar right section (search + clock) */
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        /* ── Mobile (≤768px) ─────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            /* Sidebar slides in from the left as an overlay.
+               100dvh = actual visible viewport on iOS Safari (avoids the
+               address-bar + bottom-toolbar overlap that 100vh produces). */
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                z-index: 1100;
+                height: 100dvh;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            /* Prevents the logout button from being squished by flexbox */
+            .sidebar-logout {
+                flex-shrink: 0;
+            }
+            /* Required so overflow-y: auto actually kicks in on a flex child */
+            .nav-menu {
+                min-height: 0;
+            }
+
+            /* Main content no longer needs to make room for the sidebar */
+            .main-wrapper {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            /* Top bar stacks into two rows:
+               Row 1 → hamburger + page title
+               Row 2 → search bar (full width) */
+            .top-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .top-bar-right {
+                width: 100%;
+                gap: 8px;
+            }
+            /* The search input wrapper stretches to fill the row */
+            .top-bar-right > div:first-child {
+                flex: 1;
+            }
+            #global-search-bar {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            /* Dropdown anchors to the left edge of the search container instead
+               of the right (which overflows off-screen on narrow viewports) */
+            #search-results-dropdown {
+                width: 100%;
+                right: auto;
+                left: 0;
+            }
+            /* Clock is not useful on a glance-and-go mobile view */
+            #current-time {
+                display: none;
+            }
+
+            /* Show the hamburger button */
+            .hamburger-btn {
+                display: flex;
+            }
+
+            /* Chart grids stack vertically */
+            .two-col-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Controls rows wrap more tightly */
+            .controls {
+                gap: 8px;
+            }
+            .search-bar {
+                min-width: 0;
+                flex: 1 1 140px;
+            }
+
+            /* Modals get extra breathing room on mobile */
+            .modal-content {
+                padding: 20px;
+                max-height: 95vh;
+            }
+            #diag-log-modal .modal-content {
+                width: 98%;
+                padding: 16px;
+            }
+        }
+
+        /* ── Small phones (≤480px) ───────────────────────────────────────── */
+        @media (max-width: 480px) {
+            /* Stats cards go single-column so numbers stay readable */
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .glass-card {
+                padding: 14px 16px;
+            }
+            .page-title {
+                font-size: 1.2rem;
+            }
+            .btn {
+                padding: 8px 14px;
+            }
+            /* Tighter table cells so they don't overflow the card */
+            td, th {
+                padding: 9px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR OVERLAY — click outside to close on mobile -->
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar active" id="sidebar">
+        <div class="logo-container">
+            <div class="logo-text">GamePinned</div>
+            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 5px;">Admin Dashboard</div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-section-label">Management</li>
+            <li class="nav-item active" data-page="overview" onclick="showPage('overview')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+                <span>Overview</span>
+            </li>
+            <li class="nav-item" data-page="licenses" onclick="showPage('licenses')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8zm4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5zm0 4.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+                <span>Licenses</span>
+            </li>
+            <li class="nav-item" data-page="trials" onclick="showPage('trials')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 0 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.342v.7c0 .551-.478 1.086-1.011 1.342A3.5 3.5 0 0 0 4.5 13v1h7v-1a3.5 3.5 0 0 0-1.989-3.158C9.978 9.586 9.5 9.051 9.5 8.5v-.7c0-.551.478-1.086 1.011-1.342A3.5 3.5 0 0 0 11.5 3V2h-7z"/></svg>
+                <span>Trials</span>
+            </li>
+            <li class="nav-item" data-page="downloads" onclick="showPage('downloads')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.1a.5.5 0 0 1 1 0v2.1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.1a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                <span>Downloads</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='/admin/status'">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 7 7A7.008 7.008 0 0 0 8 1Zm0 13a6 6 0 1 1 6-6 6.007 6.007 0 0 1-6 6Z"/><path d="M7.5 4h1v4.2l2.7 1.6-.5.86L7.5 8.8Z"/></svg>
+                <span>Status</span>
+            </li>
+            <li class="nav-section-label">System</li>
+            <li class="nav-item" data-page="system" onclick="showPage('system')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+                <span>Settings</span>
+            </li>
+            <li class="nav-item" data-page="diagnostics" onclick="showPage('diagnostics')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/><path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/></svg>
+                <span>Diagnostics</span>
+            </li>
+            <li class="nav-item" data-page="logs" onclick="showPage('logs')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm0 1h12a1 1 0 0 1 1 1v.5H1V4a1 1 0 0 1 1-1zm-1 3h14v7a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6zm2 2.5a.5.5 0 0 0 0 1h10a.5.5 0 0 0 0-1H3zm0 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H3z"/></svg>
+                <span>Logs</span>
+            </li>
+            <li class="nav-item" data-page="newsletter" onclick="showPage('newsletter')">
+                <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/></svg>
+                <span>Feedback</span>
+            </li>
+        </ul>
+
+        <div class="sidebar-logout">
+            <button class="btn btn-small btn-secondary" onclick="window.location.href='/admin/logout'" style="width: 100%;">Leave Before It Breaks</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper active" id="dashboard">
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="page-title" id="page-title">Overview</h1>
+            <div class="top-bar-right">
+                <div style="position:relative;">
+                    <input type="text" id="global-search-bar" placeholder="Search licenses, keys, HWIDs..." autocomplete="off">
+                    <div id="search-results-dropdown"></div>
+                </div>
+                <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;" id="current-time"></div>
+            </div>
+        </div>
+
+        <!-- OVERVIEW PAGE -->
+        <div id="page-overview" class="page active">
+            <!-- Expiring Soon Alert (hidden when empty) -->
+            <div id="expiry-alert-banner" style="display:none; background:rgba(255,167,38,0.12); border:1px solid rgba(255,167,38,0.4); border-radius:12px; padding:16px 20px; margin-bottom:20px; display:none;">
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="font-size:1.2rem;">⚠️</span>
+                    <strong id="expiry-alert-title" style="color:#FFA726;"></strong>
+                    <div id="expiry-alert-list" style="font-size:0.85rem; color:rgba(255,255,255,0.7); margin-left:auto;"></div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="glass-card stat-card" style="border-left:3px solid #e60012;">
+                    <div class="stat-value" id="stats-total-keys">0</div>
+                    <div class="stat-label">Total Licenses</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4CAF50;">
+                    <div class="stat-value" id="stats-active-licenses" style="color:#4CAF50;">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4FC3F7;">
+                    <div class="stat-value" id="stats-total-devices" style="color:#4FC3F7;">0</div>
+                    <div class="stat-label">Total Devices</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #FF9800;">
+                    <div class="stat-value" id="stats-seats-usage" style="color:#FF9800;">0/0</div>
+                    <div class="stat-label">How Crowded It Is</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #AB47BC;">
+                    <div class="stat-value" id="stats-subscription-count" style="color:#AB47BC;">0</div>
+                    <div class="stat-label">Active Subscriptions</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #FFD54F;">
+                    <div class="stat-value" id="stats-perpetual-count" style="color:#FFD54F;">0</div>
+                    <div class="stat-label">One-Time Buyers (Based)</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #FFB300;">
+                    <div class="stat-value" id="stats-trial-active" style="color:#FFB300;">0</div>
+                    <div class="stat-label">People Kicking The Tires</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4CAF50;">
+                    <div class="stat-value" id="stats-trial-converted" style="color:#4CAF50;">0</div>
+                    <div class="stat-label">Trial Conversions</div>
+                </div>
+            </div>
+
+            <!-- CHARTS -->
+            <div class="two-col-grid">
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 20px; color: rgba(255,255,255,0.8);">License Status</h3>
+                    <div style="height: 250px;">
+                        <canvas id="status-chart"></canvas>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 20px; color: rgba(255,255,255,0.8);">Tier Distribution</h3>
+                    <div style="height: 250px;">
+                        <canvas id="tier-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LICENSES PAGE -->
+        <div id="page-licenses" class="page">
+            <div class="glass-card">
+                <div class="controls">
+                    <input type="text" class="search-bar" placeholder="Search by license key..." id="license-search" style="max-width:220px;">
+                    <input type="text" class="search-bar" placeholder="Filter by customer email..." id="customer-email-filter" style="max-width:220px;">
+                    <select id="filter-tier">
+                        <option value="">All Tiers</option>
+                        <option value="FREE">Free</option>
+                        <option value="PERPETUAL">Perpetual</option>
+                        <option value="SUBSCRIPTION">Subscription</option>
+                        <option value="TRIAL">Trial</option>
+                    </select>
+                    <select id="filter-status">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="canceled">Canceled</option>
+                        <option value="expired">Expired</option>
+                        <option value="revoked">Revoked</option>
+                    </select>
+                    <button class="btn btn-small" onclick="openCreateModal()">Mint a License</button>
+                    <button class="btn btn-small btn-secondary" onclick="loadDashboard()">Refresh</button>
+                    <button class="btn btn-small btn-secondary" onclick="exportLicensesCSV()" title="Export to CSV">Dump to Spreadsheet</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Still Alive?</th>
+                                <th>License Key</th>
+                                <th>Customer</th>
+                                <th>Tier</th>
+                                <th>Seats</th>
+                                <th>Expiry</th>
+                                <th>Last Seen Alive</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+
+                        </thead>
+                        <tbody id="license-table-body"></tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div id="license-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="license-page-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;gap:6px;">
+                        <button class="btn btn-small btn-secondary" id="license-prev-btn" onclick="changeLicensePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="license-next-btn" onclick="changeLicensePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPIRING THIS MONTH SECTION -->
+            <div class="glass-card" id="expiring-month-section" style="display:none;">
+                <div class="controls">
+                    <h3 style="margin:0; color:rgba(255,255,255,0.8);">Expiring Within 30 Days</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadExpiringThisMonth()">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>License Key</th>
+                                <th>Customer</th>
+                                <th>Expiry Date</th>
+                                <th>Days Left</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expiring-month-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="exp-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="exp-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="exp-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="expChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="exp-pg-prev" onclick="expChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="exp-pg-next" onclick="expChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYSTEM PAGE -->
+        <div id="page-system" class="page">
+            <!-- UPDATES SECTION -->
+            <div class="glass-card">
+                <div class="controls">
+                    <h3 style="margin: 0; color: rgba(255,255,255,0.8);">Update Management</h3>
+                    <button class="btn btn-small" onclick="openUpdateModal()">Ship It</button>
+                    <button class="btn btn-small btn-secondary" onclick="loadUpdates()">Refresh</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Release Notes</th>
+                                <th>Required</th>
+                                <th>File Size</th>
+                                <th>Upload Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="updates-table-body"></tbody>
+                    </table>
+                </div>
+                <div id="upd-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="upd-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="upd-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="updChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="upd-pg-prev" onclick="updChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="upd-pg-next" onclick="updChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECURITY MONITOR SECTION -->
+            <div class="glass-card">
+                <div class="controls">
+                    <h3 style="margin: 0; color: rgba(255,255,255,0.8);">Security Monitor</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadRateLimits()">Refresh</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Endpoint</th>
+                                <th>Failed Attempts</th>
+                                <th>First Attempt</th>
+                                <th>Last Attempt</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rate-limits-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="rl-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="rl-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="rl-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="rlChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="rl-pg-prev" onclick="rlChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="rl-pg-next" onclick="rlChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIT LOG SECTION -->
+            <div class="glass-card" style="margin-top: 20px;">
+                <div class="controls">
+                    <h3 style="margin: 0; color: rgba(255,255,255,0.8);">Audit Log</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadAuditLog()">Refresh</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Target</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-log-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="al-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="al-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="al-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="alChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="al-pg-prev" onclick="alChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="al-pg-next" onclick="alChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAGNOSTICS PAGE -->
+        <div id="page-diagnostics" class="page">
+            <div class="glass-card">
+                <div class="controls">
+                    <h3 style="margin: 0; color: rgba(255,255,255,0.8);">Diagnostics</h3>
+                    <input type="text" class="search-bar" placeholder="Search by hardware ID or license key..." id="diag-search" style="max-width:300px;">
+                    <button class="btn btn-small btn-secondary" onclick="loadDiagnostics()">Refresh</button>
+                    <button class="btn btn-small" id="diag-delete-selected-btn" style="background:#3d0000;border-color:#7a0000;color:#ff6b6b;display:none;" onclick="deleteSelectedDiagnostics()">Nuke Selected (<span id="diag-sel-count">0</span>)</button>
+                </div>
+                <p style="color: rgba(255,255,255,0.5); margin: 8px 0 16px 0;">Users found a bug. Or they don't know what they're doing. Click to find out.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:32px;"><input type="checkbox" id="diag-check-all" title="Select all"></th>
+                                <th>Submitted</th>
+                                <th>Hardware ID</th>
+                                <th>License Key</th>
+                                <th>Version</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diagnostics-tbody">
+                            <tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="diag-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="diag-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="diag-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="diagChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="diag-pg-prev" onclick="diagChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="diag-pg-next" onclick="diagChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS PAGE -->
+        <div id="page-logs" class="page">
+            <!-- Stats bar -->
+            <div class="stats-grid" style="margin-bottom:20px;" id="log-stats-grid">
+                <div class="glass-card stat-card" style="border-left:3px solid rgba(255,255,255,0.2);">
+                    <div class="stat-value" id="log-stat-total" style="color:rgba(255,255,255,0.9);">-</div>
+                    <div class="stat-label">Today's Drama</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4CAF50;">
+                    <div class="stat-value" id="log-stat-info" style="color:#4CAF50;">-</div>
+                    <div class="stat-label">Info</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #FFB300;">
+                    <div class="stat-value" id="log-stat-warn" style="color:#FFB300;">-</div>
+                    <div class="stat-label">Warnings</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #ef5350;">
+                    <div class="stat-value" id="log-stat-error" style="color:#ef5350;">-</div>
+                    <div class="stat-label">Errors</div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <!-- Filter bar -->
+                <div class="controls" style="flex-wrap:wrap; gap:8px;">
+                    <h3 style="margin:0; color:rgba(255,255,255,0.8); white-space:nowrap;">Logs</h3>
+                    <select id="log-filter-level" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:6px 10px;border-radius:6px;font-size:0.85rem;">
+                        <option value="">All Levels</option>
+                        <option value="info">Info</option>
+                        <option value="warn">Warning</option>
+                        <option value="error">Error</option>
+                    </select>
+                    <select id="log-filter-category" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:6px 10px;border-radius:6px;font-size:0.85rem;">
+                        <option value="">All Categories</option>
+                        <option value="auth">Auth</option>
+                        <option value="license">License</option>
+                        <option value="webhook">Webhook</option>
+                        <option value="download">Download</option>
+                        <option value="email">Email</option>
+                        <option value="rate_limit">Rate Limit</option>
+                        <option value="cron">Cron</option>
+                        <option value="error">Error</option>
+                        <option value="system">Settings</option>
+                    </select>
+                    <input type="text" id="log-filter-search" placeholder="Search message, event, key, IP..." style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:6px 10px;border-radius:6px;font-size:0.85rem;min-width:220px;">
+                    <input type="date" id="log-filter-from" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:6px 10px;border-radius:6px;font-size:0.85rem;">
+                    <input type="date" id="log-filter-to" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:6px 10px;border-radius:6px;font-size:0.85rem;">
+                    <button class="btn btn-small" onclick="applyLogFilters()">Apply</button>
+                    <button class="btn btn-small btn-secondary" onclick="clearLogFilters()">Clear</button>
+                    <button class="btn btn-small btn-secondary" id="log-live-btn" onclick="toggleLogLive()">Live: Off</button>
+                    <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;margin-left:auto;" id="log-result-count"></span>
+                </div>
+
+                <!-- Quick filter chips -->
+                <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                    <span style="font-size:0.8rem;color:rgba(255,255,255,0.4);align-self:center;">Quick:</span>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('error','')">Errors only</button>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('warn','')">Warnings only</button>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('','auth')">Auth</button>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('','webhook')">Webhooks</button>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('','license')">License</button>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('','rate_limit')">Rate Limits</button>
+                    <button class="btn btn-small btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="setLogQuickFilter('','download')">Downloads</button>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table id="logs-table">
+                        <thead>
+                            <tr>
+                                <th style="width:140px;">Time</th>
+                                <th style="width:70px;">Level</th>
+                                <th style="width:90px;">Category</th>
+                                <th style="width:160px;">Event</th>
+                                <th>Message</th>
+                                <th style="width:110px;">IP</th>
+                                <th style="width:110px;">License Key</th>
+                                <th style="width:32px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-tbody">
+                            <tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="log-pagination" style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;">
+                    <button class="btn btn-small btn-secondary" id="log-prev-btn" onclick="logChangePage(-1)" disabled>Previous</button>
+                    <span style="color:rgba(255,255,255,0.5);font-size:0.85rem;" id="log-page-label">Page 1</span>
+                    <button class="btn btn-small btn-secondary" id="log-next-btn" onclick="logChangePage(1)" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-trials" class="page">
+            <!-- Trial funnel stats -->
+            <div class="stats-grid" style="margin-bottom:20px;">
+                <div class="glass-card stat-card" style="border-left:3px solid #FFB300;">
+                    <div class="stat-value" id="trial-stat-total" style="color:#FFB300;">0</div>
+                    <div class="stat-label">Total Trials</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4FC3F7;">
+                    <div class="stat-value" id="trial-stat-active" style="color:#4FC3F7;">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #FF6B35;">
+                    <div class="stat-value" id="trial-stat-expiring" style="color:#FF6B35;">0</div>
+                    <div class="stat-label">Expiring This Week</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4CAF50;">
+                    <div class="stat-value" id="trial-stat-converted" style="color:#4CAF50;">0</div>
+                    <div class="stat-label">Converted</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4CAF50;">
+                    <div class="stat-value" id="trial-stat-rate" style="color:#4CAF50;">0%</div>
+                    <div class="stat-label">Freeloaders Who Paid Up</div>
+                </div>
+            </div>
+            <!-- Trial list -->
+            <div class="glass-card">
+                <div class="controls">
+                    <h3 style="margin:0;color:rgba(255,255,255,0.8);">All Trials</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadTrials()">Refresh</button>
+                </div>
+                <p style="color:rgba(255,255,255,0.5);margin:8px 0 16px 0;">Each trial is time-limited to <span id="trial-days-label">30</span> days. One trial per email address and one per hardware ID.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Key</th>
+                                <th>Created</th>
+                                <th>Expires</th>
+                                <th>Days Left</th>
+                                <th>Activated</th>
+                                <th>Reminders</th>
+                                <th>Converted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trials-tbody">
+                            <tr><td colspan="9" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="trials-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="trials-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="trials-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="trialsChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="trials-pg-prev" onclick="trialsChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="trials-pg-next" onclick="trialsChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOWNLOADS PAGE -->
+        <div id="page-downloads" class="page">
+            <div class="stats-grid" style="margin-bottom:20px;">
+                <div class="glass-card stat-card" style="border-left:3px solid #4FC3F7;">
+                    <div class="stat-value" id="dl-stat-total" style="color:#4FC3F7;">0</div>
+                    <div class="stat-label">Total Downloads</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #4CAF50;">
+                    <div class="stat-value" id="dl-stat-month" style="color:#4CAF50;">0</div>
+                    <div class="stat-label">This Month</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #FFD54F;">
+                    <div class="stat-value" id="dl-stat-today" style="color:#FFD54F;">0</div>
+                    <div class="stat-label">Today</div>
+                </div>
+                <div class="glass-card stat-card" style="border-left:3px solid #CE93D8;">
+                    <div class="stat-value" id="dl-stat-countries" style="color:#CE93D8;">0</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+            </div>
+
+            <!-- Daily downloads chart -->
+            <div class="glass-card" style="margin-bottom:20px;">
+                <h3 style="margin-bottom:20px;color:rgba(255,255,255,0.8);">Downloads Per Day (Last 30 Days)</h3>
+                <div style="height:200px;">
+                    <canvas id="dl-daily-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- By country + by source side by side -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                <div class="glass-card">
+                    <h3 style="margin-bottom:16px;color:rgba(255,255,255,0.8);">Top Countries</h3>
+                    <div id="dl-countries-list" style="display:flex;flex-direction:column;gap:8px;">
+                        <span style="color:rgba(255,255,255,0.4);">Hold on...</span>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <h3 style="margin-bottom:16px;color:rgba(255,255,255,0.8);">By Source</h3>
+                    <div style="height:200px;">
+                        <canvas id="dl-source-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- By version -->
+            <div class="glass-card" style="margin-bottom:20px;">
+                <h3 style="margin-bottom:16px;color:rgba(255,255,255,0.8);">By Version</h3>
+                <div id="dl-versions-list" style="display:flex;flex-wrap:wrap;gap:12px;">
+                    <span style="color:rgba(255,255,255,0.4);">Hold on...</span>
+                </div>
+            </div>
+
+            <!-- Recent downloads table -->
+            <div class="glass-card">
+                <div class="controls">
+                    <h3 style="margin:0;color:rgba(255,255,255,0.8);">Recent Downloads</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadDownloads()">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Country</th>
+                                <th>Version</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dl-recent-tbody">
+                            <tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="dl-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px;">
+                    <span id="dl-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="dl-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="dlChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="dl-pg-prev" onclick="dlChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="dl-pg-next" onclick="dlChangePage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEWSLETTER PAGE -->
+        <div id="page-newsletter" class="page">
+            <!-- Form submissions -->
+            <div class="glass-card" style="margin-bottom:24px;">
+                <div class="controls">
+                    <h3 style="margin:0;color:rgba(255,255,255,0.8);">Form Submissions</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadFeedbackSubmissions()">Refresh</button>
+                </div>
+                <p style="color:rgba(255,255,255,0.5);margin:8px 0 16px 0;">Messages submitted via the website support form. <span id="fb-count" style="color:rgba(255,255,255,0.35);"></span></p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Subject</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedback-tbody">
+                            <tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Newsletter subscribers -->
+            <div class="glass-card">
+                <div class="controls">
+                    <h3 style="margin:0;color:rgba(255,255,255,0.8);">Newsletter Subscribers</h3>
+                    <button class="btn btn-small btn-secondary" onclick="loadNewsletter()">Refresh</button>
+                </div>
+                <p style="color:rgba(255,255,255,0.5);margin:8px 0 16px 0;">People who read the blog and thought 'sure, why not'. <span id="nl-count" style="color:rgba(255,255,255,0.35);"></span></p>
+                <div id="nl-pg-bar" style="display:none;width:100%;align-items:center;justify-content:space-between;padding:0 0 12px;flex-wrap:wrap;gap:8px;">
+                    <span id="nl-pg-info" style="font-size:0.85rem;color:rgba(255,255,255,0.5);"></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="nl-pg-size" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 8px;font-size:0.85rem;" onchange="nlChangeSize(this.value)">
+                            <option value="10">10/page</option>
+                            <option value="50" selected>50/page</option>
+                            <option value="100">100/page</option>
+                        </select>
+                        <button class="btn btn-small btn-secondary" id="nl-pg-prev" onclick="nlChangePage(-1)">Previous</button>
+                        <button class="btn btn-small btn-secondary" id="nl-pg-next" onclick="nlChangePage(1)">Next</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Source</th>
+                                <th>Subscribed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newsletter-tbody">
+                            <tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CREATE LICENSE MODAL -->
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <h2>Generate New License</h2>
+            
+            <label>License Key (leave blank for auto-generate)</label>
+            <input type="text" id="new-key" placeholder="AUTO-GENERATED-KEY">
+            
+            <label>Who Is This Person</label>
+            <input type="text" id="new-customer" placeholder="Customer name or email">
+            
+            <label>Tier</label>
+            <select id="new-tier" onchange="onTierChange()">
+                <option value="PERPETUAL" selected>Perpetual (lifetime)</option>
+                <option value="SUBSCRIPTION">Subscription (time-limited)</option>
+                <option value="TRIAL">Trial (time-limited, free)</option>
+            </select>
+            
+            <label>Seat Limit</label>
+            <input type="number" id="new-seats" value="1" min="1">
+            
+            <div id="expiry-section" style="display: none;">
+                <label>Duration</label>
+                <select id="new-duration" onchange="onDurationChange()">
+                    <option value="1">1 Month</option>
+                    <option value="3">3 Months</option>
+                    <option value="6">6 Months</option>
+                    <option value="12" selected>12 Months</option>
+                </select>
+                
+                <label>Expiry Date</label>
+                <input type="date" id="new-expiry">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn" onclick="generateKey()">Generate</button>
+                <button class="btn btn-secondary" onclick="closeModal('create-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW DEVICES MODAL -->
+    <div id="devices-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="device-modal-title">Linked Devices</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hardware ID</th>
+                            <th>First Seen</th>
+                            <th>Last Seen</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-table-body"></tbody>
+                </table>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('devices-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT TIER MODAL -->
+    <div id="edit-tier-modal" class="modal">
+        <div class="modal-content">
+            <h2>Edit License Tier</h2>
+
+            <input type="hidden" id="edit-tier-license-id">
+
+            <label>Tier</label>
+            <select id="edit-tier-type" onchange="toggleExpiryField()">
+                <option value="PERPETUAL">PERPETUAL (Lifetime)</option>
+                <option value="SUBSCRIPTION">SUBSCRIPTION (Time-limited)</option>
+                <option value="TRIAL">TRIAL (Time-limited, free)</option>
+            </select>
+
+            <div id="expiry-field-container" style="display: none;">
+                <label>Expiry Date</label>
+                <input type="date" id="edit-tier-expiry">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" onclick="saveLicenseTier()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="closeModal('edit-tier-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER NOTES MODAL -->
+    <div id="notes-modal" class="modal">
+        <div class="modal-content">
+            <h2>Customer Notes</h2>
+            <input type="hidden" id="notes-license-id">
+            <label>Things you can't say to their face</label>
+            <textarea id="notes-textarea" placeholder="Things you can't say to their face..."></textarea>
+            <div class="modal-actions">
+                <button class="btn" onclick="saveNotes()">Save Notes</button>
+                <button class="btn btn-secondary" onclick="closeModal('notes-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAGNOSTIC LOG VIEWER MODAL -->
+    <div id="diag-log-modal" class="modal">
+        <div class="modal-content" style="max-width:800px;width:95%;">
+            <h2>Diagnostic Log</h2>
+            <div id="diag-log-meta" style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:8px;"></div>
+            <pre id="diag-log-content">Hold on...</pre>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="diag-copy-btn" onclick="copyDiagLog()">Copy All</button>
+                <button class="btn btn-secondary" onclick="closeModal('diag-log-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GENERIC CONFIRM MODAL -->
+    <div id="gp-confirm-modal" class="modal">
+        <div class="modal-content" style="max-width:420px;">
+            <h2 id="gp-confirm-title" style="font-size:1.2rem;margin-bottom:16px;"></h2>
+            <p id="gp-confirm-msg" style="color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:24px;"></p>
+            <div class="modal-actions">
+                <button class="btn btn-error" id="gp-confirm-ok">Confirm</button>
+                <button class="btn btn-secondary" onclick="closeModal('gp-confirm-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GENERIC ALERT MODAL -->
+    <div id="gp-alert-modal" class="modal">
+        <div class="modal-content" style="max-width:380px;">
+            <p id="gp-alert-msg" style="color:rgba(255,255,255,0.85);line-height:1.6;margin-bottom:24px;"></p>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('gp-alert-modal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT SEATS MODAL -->
+    <div id="edit-seats-modal" class="modal">
+        <div class="modal-content" style="max-width:340px;">
+            <h2>Edit Seat Limit</h2>
+            <input type="hidden" id="edit-seats-id">
+            <label>New seat limit</label>
+            <input type="number" id="edit-seats-value" min="1" style="margin-bottom:20px;">
+            <div class="modal-actions">
+                <button class="btn" onclick="saveSeats()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('edit-seats-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEEDBACK DETAIL MODAL -->
+    <div id="feedback-detail-modal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <h2>Feedback Submission</h2>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+                <tr><td style="color:rgba(255,255,255,0.5);padding:4px 12px 4px 0;width:90px;vertical-align:top;">Type</td><td id="fb-modal-type" style="color:#fff;"></td></tr>
+                <tr><td style="color:rgba(255,255,255,0.5);padding:4px 12px 4px 0;vertical-align:top;">Subject</td><td id="fb-modal-subject" style="color:#fff;"></td></tr>
+                <tr><td style="color:rgba(255,255,255,0.5);padding:4px 12px 4px 0;vertical-align:top;">Name</td><td id="fb-modal-name" style="color:#fff;"></td></tr>
+                <tr><td style="color:rgba(255,255,255,0.5);padding:4px 12px 4px 0;vertical-align:top;">Email</td><td id="fb-modal-email" style="color:#fff;"></td></tr>
+                <tr><td style="color:rgba(255,255,255,0.5);padding:4px 12px 4px 0;vertical-align:top;">Platform</td><td id="fb-modal-platform" style="color:#fff;"></td></tr>
+                <tr><td style="color:rgba(255,255,255,0.5);padding:4px 12px 4px 0;vertical-align:top;">Date</td><td id="fb-modal-date" style="color:#fff;"></td></tr>
+            </table>
+            <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:16px;">
+                <p style="margin:0 0 8px 0;font-size:0.8rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;">Description</p>
+                <pre id="fb-modal-desc" style="margin:0;white-space:pre-wrap;word-break:break-word;font-family:inherit;color:rgba(255,255,255,0.85);font-size:0.9rem;line-height:1.6;"></pre>
+            </div>
+            <div class="modal-actions" style="margin-top:16px;">
+                <button class="btn btn-secondary" onclick="closeModal('feedback-detail-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPLOAD UPDATE MODAL -->
+    <div id="update-modal" class="modal">
+        <div class="modal-content">
+            <h2>📤 Upload New Update</h2>
+            
+            <form id="update-form">
+                <label>Version Number</label>
+                <input type="text" id="update-version" placeholder="2.0.0" required>
+                
+                <label>Installer File (.exe)</label>
+                <input type="file" id="update-file" accept=".exe" required style="padding: 8px;">
+                
+                <label>Release Notes</label>
+                <textarea id="update-notes" rows="4" placeholder="What changed (be honest)..."></textarea>
+                
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="update-required" style="width: auto; margin: 0;">
+                    <span>Make them update whether they like it or not</span>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <input type="checkbox" id="update-draft" style="width: auto; margin: 0;">
+                    <span>Invisible to everyone but you</span>
+                </label>
+                
+                <div id="upload-progress-container" style="display: none; margin-top: 15px;">
+                    <div style="background: rgba(0,0,0,0.3); height: 30px; border-radius: 8px; overflow: hidden; margin-bottom: 10px;">
+                        <div id="upload-progress-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <div id="upload-progress-text" style="color: rgba(255,255,255,0.7); font-size: 0.9rem; text-align: center;"></div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn" id="upload-submit-btn">Upload</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('update-modal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // COPY TO CLIPBOARD HELPER
+        function copyText(text, el) {
+            navigator.clipboard.writeText(text).then(function() {
+                var orig = el ? el.style.color : null;
+                if (el) { el.style.color = '#4CAF50'; }
+                setTimeout(function() { if (el) el.style.color = orig; }, 800);
+            }).catch(function() {});
+        }
+
+        // Delegated click-to-copy: handles all elements with data-copy attribute
+        document.addEventListener('click', function(e) {
+            var el = e.target.closest('[data-copy]');
+            if (el) copyText(el.getAttribute('data-copy'), el);
+        });
+
+        // STATE MANAGEMENT
+        let allLicenses = [];
+        let filteredLicenses = [];
+        let statusChart, tierChart, platformChart, dlDailyChart, dlSourceChart;
+
+        let licenseHealthLoaded = false;
+        let currentPage = 1;
+        const PAGE_SIZE = 50;
+
+        // Logs page state — declared here so loadLogs() works whenever loadPageData() calls it
+        var logCurrentOffset = 0;
+        var logPageSize = 100;
+        var logTotalRows = 0;
+        var logLiveTimer = null;
+
+        // Restore last visited page on load
+        const lastPage = sessionStorage.getItem('gp_last_page');
+        if (lastPage && lastPage !== 'overview') showPage(lastPage);
+
+        // Load dashboard data on page load (cookie auth handled server-side)
+        loadDashboard();
+
+        // NAVIGATION
+        function showPage(pageName) {
+            closeSidebar();
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById('page-' + pageName).classList.add('active');
+            const navItem = document.querySelector('.nav-item[data-page="' + pageName + '"]');
+            if (navItem) navItem.classList.add('active');
+
+            const titles = {
+                overview: 'Overview',
+                licenses: 'License Management',
+
+                system: 'Settings',
+                diagnostics: 'Diagnostics',
+                trials: 'Trial Management',
+                downloads: 'Downloads',
+                logs: 'Logs',
+                newsletter: 'Feedback'
+            };
+            document.getElementById('page-title').textContent = titles[pageName] || pageName;
+
+            // Stop live log timer when leaving logs page
+            if (pageName !== 'logs' && logLiveTimer) {
+                clearInterval(logLiveTimer);
+                logLiveTimer = null;
+                var liveBtn = document.getElementById('log-live-btn');
+                if (liveBtn) { liveBtn.textContent = 'Live: Off'; liveBtn.style.borderColor = ''; liveBtn.style.color = ''; }
+            }
+
+            sessionStorage.setItem('gp_last_page', pageName);
+            loadPageData(pageName);
+        }
+
+        function loadPageData(page) {
+            switch(page) {
+                case 'overview':
+                    break; // Already loaded
+                case 'licenses':
+                    applyFilters();
+                    break;
+                case 'system':
+                    loadUpdates();
+
+                    loadRateLimits();
+                    loadAuditLog();
+                    break;
+                case 'diagnostics':
+                    loadDiagnostics();
+                    break;
+                case 'logs':
+                    loadLogStats();
+                    loadLogs();
+                    break;
+                case 'trials':
+                    loadTrials();
+                    break;
+                case 'downloads':
+                    loadDownloads();
+                    break;
+                case 'newsletter':
+                    loadFeedbackSubmissions();
+                    loadNewsletter();
+                    break;
+            }
+        }
+
+        // Parse a DB timestamp to a proper UTC Date.
+        // SQLite CURRENT_TIMESTAMP stores "YYYY-MM-DD HH:MM:SS" without timezone.
+        // Without the Z suffix, new Date() treats it as local time, causing a double-offset.
+        // This helper adds Z when needed so the browser always interprets it as UTC.
+        function parseUtcDate(s) {
+            if (!s) return null;
+            if (s.indexOf('Z') >= 0 || s.indexOf('+') >= 0) return new Date(s);
+            return new Date(s.replace(' ', 'T') + 'Z');
+        }
+
+        // TIME DISPLAY
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // LOAD DASHBOARD
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/admin/dashboard');
+                if (!response.ok) {
+                    window.location.href = '/admin';
+                    return;
+                }
+                const data = await response.json();
+                allLicenses = data.licenses;
+
+                // Health data is bundled — set BEFORE renderDashboard so dots appear on first render
+                if (data.health) {
+                    licenseHealthMap = data.health;
+                    licenseHealthLoaded = true;
+                }
+
+                renderDashboard(data);
+
+                // Trial stats bundled
+                try {
+                    if (data.trial_stats) {
+                        var activeEl = document.getElementById('stats-trial-active');
+                        var convEl = document.getElementById('stats-trial-converted');
+                        if (activeEl) activeEl.textContent = data.trial_stats.active || 0;
+                        if (convEl) convEl.textContent = (data.trial_stats.converted || 0) + ' (' + (data.trial_stats.conversion_rate || '0%') + ')';
+                    }
+                } catch (te) { /* non-critical */ }
+
+                // Expiring data bundled
+                if (data.expiring) renderExpiringThisMonth(data.expiring);
+
+            } catch (e) {
+                console.error('Dashboard load error:', e);
+            }
+        }
+
+        function renderDashboard(data) {
+            updateStats(data.stats);
+            filteredLicenses = allLicenses;
+            currentPage = 1;
+            renderTable(filteredLicenses);
+
+            // Set up event listeners
+            const searchInput = document.getElementById('license-search');
+            const statusFilter = document.getElementById('filter-status');
+            const tierFilter = document.getElementById('filter-tier');
+
+            if (searchInput && !searchInput.dataset.listenerAdded) {
+                searchInput.addEventListener('input', applyFilters);
+                searchInput.dataset.listenerAdded = 'true';
+            }
+            if (statusFilter && !statusFilter.dataset.listenerAdded) {
+                statusFilter.addEventListener('change', applyFilters);
+                statusFilter.dataset.listenerAdded = 'true';
+            }
+            if (tierFilter && !tierFilter.dataset.listenerAdded) {
+                tierFilter.addEventListener('change', applyFilters);
+                tierFilter.dataset.listenerAdded = 'true';
+            }
+            var emailFilter = document.getElementById('customer-email-filter');
+            if (emailFilter && !emailFilter.dataset.listenerAdded) {
+                emailFilter.addEventListener('input', applyFilters);
+                emailFilter.dataset.listenerAdded = 'true';
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('stats-total-keys').textContent = stats.totalKeys || 0;
+            document.getElementById('stats-active-licenses').textContent = stats.activeLicenses || 0;
+            document.getElementById('stats-total-devices').textContent = stats.totalDevices || 0;
+            document.getElementById('stats-seats-usage').textContent =
+                (stats.totalSeatsUsed || 0) + '/' + (stats.totalSeatsAvailable || 0);
+
+            // Expiring soon banner
+            var banner = document.getElementById('expiry-alert-banner');
+            var expiryList = stats.expiringSoonList || [];
+            if (expiryList.length > 0) {
+                document.getElementById('expiry-alert-title').textContent =
+                    expiryList.length + ' subscription' + (expiryList.length > 1 ? 's' : '') + ' expiring within 30 days';
+                document.getElementById('expiry-alert-list').innerHTML = expiryList.slice(0, 5).map(function(e) {
+                    return '<span style="margin-right:16px; white-space:nowrap">' +
+                        e.license_key + ' · ' + e.days_left + 'd left</span>';
+                }).join('');
+                banner.style.display = 'flex';
+            } else {
+                banner.style.display = 'none';
+            }
+
+            var tc = stats.tierCounts || {};
+            document.getElementById('stats-subscription-count').textContent = (tc['SUBSCRIPTION'] || 0);
+            document.getElementById('stats-perpetual-count').textContent = (tc['PERPETUAL'] || 0) + (tc['PRO'] || 0);
+
+            updateCharts(stats);
+        }
+
+        function updateCharts(stats) {
+            const statusCtx = document.getElementById('status-chart');
+            const tierCtx = document.getElementById('tier-chart');
+
+            if (!statusCtx || !tierCtx) return;
+
+            if (statusChart) statusChart.destroy();
+            if (tierChart) tierChart.destroy();
+
+            statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active', 'Expired', 'Expiring Soon', 'Revoked'],
+                    datasets: [{
+                        data: [
+                            stats.activeLicenses || 0,
+                            stats.expiredLicenses || 0,
+                            stats.expiringSoon || 0,
+                            stats.revokedLicenses || 0
+                        ],
+                        backgroundColor: ['#22C55E', '#EF4444', '#F59E0B', '#555555'],
+                        borderColor: 'rgba(0,0,0,0.5)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#ffffff', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+
+            const tierCounts = stats.tierCounts || {};
+            tierChart = new Chart(tierCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(tierCounts),
+                    datasets: [{
+                        data: Object.values(tierCounts),
+                        backgroundColor: ['#E60012', '#A855F7', '#3B82F6', '#555555'],
+                        borderColor: 'rgba(0,0,0,0.5)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#ffffff', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // FILTERING
+        function applyFilters() {
+            const searchTerm = document.getElementById('license-search').value.toLowerCase();
+            const emailTerm = document.getElementById('customer-email-filter').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const tierFilter = document.getElementById('filter-tier').value;
+            const now = new Date();
+
+            filteredLicenses = allLicenses.filter(l => {
+                const matchesSearch = !searchTerm ||
+                    l.license_key.toLowerCase().includes(searchTerm);
+
+                var matchesEmail = true;
+                if (emailTerm) {
+                    var emailVal = '';
+                    try {
+                        if (l.customer_info && l.customer_info.startsWith('{')) {
+                            emailVal = (JSON.parse(l.customer_info).email || '').toLowerCase();
+                        } else {
+                            emailVal = (l.customer_info || '').toLowerCase();
+                        }
+                    } catch(e) { emailVal = (l.customer_info || '').toLowerCase(); }
+                    matchesEmail = emailVal.indexOf(emailTerm) >= 0;
+                }
+
+                let matchesStatus = true;
+                if (statusFilter) {
+                    const isExpired = l.expiry_date && new Date(l.expiry_date) < now;
+
+                    // Check if license is canceled (from customer_info)
+                    let isCanceled = false;
+                    try {
+                        if (l.customer_info && l.customer_info.startsWith('{')) {
+                            const info = JSON.parse(l.customer_info);
+                            isCanceled = info.cancellation_reason === 'subscription.canceled';
+                        }
+                    } catch(e) {}
+
+                    if (statusFilter === 'active') {
+                        // Active means: is_active=1, not expired, not canceled
+                        matchesStatus = l.is_active && !isExpired && !isCanceled;
+                    } else if (statusFilter === 'canceled') {
+                        // Canceled means: is_active=1, marked as canceled, not yet expired
+                        matchesStatus = l.is_active && isCanceled && !isExpired;
+                    } else if (statusFilter === 'expired') {
+                        // Expired means: past expiry date (could be canceled or not)
+                        matchesStatus = isExpired;
+                    } else if (statusFilter === 'revoked') {
+                        // Revoked means: is_active=0 (immediate deactivation)
+                        matchesStatus = !l.is_active;
+                    }
+                }
+
+                const matchesTier = !tierFilter || l.tier === tierFilter;
+                return matchesSearch && matchesEmail && matchesStatus && matchesTier;
+            });
+
+            currentPage = 1;
+            renderTable(filteredLicenses);
+        }
+
+        // LICENSE MANAGEMENT
+        async function viewDevices(id, key) {
+            document.getElementById('device-modal-title').textContent = 'Linked Devices: ' + key;
+            const tbody = document.getElementById('device-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Hold on...</td></tr>';
+            document.getElementById('devices-modal').style.display = 'flex';
+
+            try {
+                const res = await fetch('/api/admin/devices?license_id=' + id, {
+                    headers: {}
+                });
+                const devices = await res.json();
+
+                tbody.innerHTML = devices.map(d => {
+                    const hwidDisplay = d.last_reported_hwid || d.hwid_hash;
+                    return '<tr>' +
+                        '<td style="font-size: 0.8rem; font-family: monospace; cursor:pointer;" title="' + hwidDisplay + ' (click to copy)" data-copy="' + hwidDisplay + '">' + hwidDisplay.substring(0, 40) + '...</td>' +
+                        '<td>' + parseUtcDate(d.first_seen).toLocaleDateString() + '</td>' +
+                        '<td>' + parseUtcDate(d.last_seen).toLocaleDateString() + '</td>' +
+                        '<td><button class="btn-small btn-error" onclick="unlinkDevice(' + d.id + ', ' + id + ', &quot;' + key + '&quot;)">Kick Device</button></td>' +
+                    '</tr>';
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="4">Error loading devices</td></tr>';
+            }
+        }
+
+        async function unlinkDevice(deviceId, licenseId, key) {
+            var btn = event && event.target;
+            gpConfirm('Unlink this device? This will free up 1 seat.', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    await fetch('/api/admin/devices/' + deviceId, { method: 'DELETE' });
+                    await viewDevices(licenseId, key);
+                    await loadDashboard();
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Unlink'; }
+                }
+            });
+        }
+
+        async function editSeats(id, currentLimit) {
+            document.getElementById('edit-seats-id').value = id;
+            document.getElementById('edit-seats-value').value = currentLimit;
+            document.getElementById('edit-seats-modal').style.display = 'flex';
+            setTimeout(function() { document.getElementById('edit-seats-value').select(); }, 50);
+        }
+
+        async function saveSeats() {
+            var id = document.getElementById('edit-seats-id').value;
+            var parsed = parseInt(document.getElementById('edit-seats-value').value);
+            if (isNaN(parsed) || parsed < 1) { gpAlert('Seat limit must be at least 1'); return; }
+            var saveBtn = document.querySelector('#edit-seats-modal .btn:not(.btn-secondary)');
+            if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '...'; }
+            try {
+                var res = await fetch('/api/admin/licenses/' + id + '/seats', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seats: parsed })
+                });
+                if (!res.ok) { gpAlert('Failed to update seat limit'); return; }
+                closeModal('edit-seats-modal');
+                await loadDashboard();
+            } catch (e) {
+                gpAlert('Failed to update seat limit');
+            } finally {
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+            }
+        }
+
+        function editLicenseTier(id, currentTier, currentExpiry) {
+            document.getElementById('edit-tier-license-id').value = id;
+            document.getElementById('edit-tier-type').value = currentTier;
+            document.getElementById('edit-tier-expiry').value = currentExpiry || '';
+            toggleExpiryField();
+            document.getElementById('edit-tier-modal').style.display = 'flex';
+        }
+
+        function toggleExpiryField() {
+            const tier = document.getElementById('edit-tier-type').value;
+            const container = document.getElementById('expiry-field-container');
+            container.style.display = tier === 'SUBSCRIPTION' ? 'block' : 'none';
+        }
+
+        async function saveLicenseTier() {
+            const id = document.getElementById('edit-tier-license-id').value;
+            const tier = document.getElementById('edit-tier-type').value;
+            const expiry = document.getElementById('edit-tier-expiry').value;
+
+            if (tier === 'SUBSCRIPTION' && !expiry) {
+                gpAlert('SUBSCRIPTION tier requires an expiry date');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/licenses/' + id + '/update-tier', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tier: tier, expiry_date: tier === 'SUBSCRIPTION' ? expiry : null })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    gpAlert('Error: ' + (err.error || err.message || 'Unknown error'));
+                    return;
+                }
+
+                closeModal('edit-tier-modal');
+                await loadDashboard();
+            } catch (error) {
+                gpAlert('Failed to update license tier');
+                console.error(error);
+            }
+        }
+
+        async function toggleLicense(event, id, currentStatus) {
+            var btn = event.target;
+            var origText = btn.textContent;
+            btn.disabled = true; btn.textContent = '...';
+            try {
+                await fetch('/api/admin/licenses/' + id + '/toggle', { method: 'POST' });
+                await loadDashboard();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        }
+
+        async function deleteLicense(event, id, key) {
+            var btn = event && event.target;
+            gpConfirm('Permanently delete license ' + key + '? This is permanent. Like a tattoo, but worse.', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    await fetch('/api/admin/licenses/' + id, { method: 'DELETE' });
+                    await loadDashboard();
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+                }
+            }, 'Delete License');
+        }
+
+        // LICENSE CREATION
+        function openCreateModal() { 
+            document.getElementById('create-modal').style.display = 'flex'; 
+        }
+
+        function onTierChange() {
+            const tier = document.getElementById('new-tier').value;
+            const expirySection = document.getElementById('expiry-section');
+            if (tier === 'SUBSCRIPTION') {
+                expirySection.style.display = 'block';
+                onDurationChange();
+            } else {
+                expirySection.style.display = 'none';
+                document.getElementById('new-expiry').value = '';
+            }
+        }
+
+        function onDurationChange() {
+            const months = parseInt(document.getElementById('new-duration').value);
+            const expiry = new Date();
+            expiry.setMonth(expiry.getMonth() + months);
+            document.getElementById('new-expiry').value = expiry.toISOString().split('T')[0];
+        }
+
+        async function generateKey() {
+            const key = document.getElementById('new-key').value;
+            const tier = document.getElementById('new-tier').value;
+            const customer = document.getElementById('new-customer').value;
+            const seats = document.getElementById('new-seats').value;
+            const expiry = document.getElementById('new-expiry').value;
+
+            if (tier === 'SUBSCRIPTION' && !expiry) {
+                gpAlert('Please select a duration for Subscription licenses.');
+                return;
+            }
+
+            var genBtn = document.querySelector('#create-modal .btn:not(.btn-secondary)');
+            if (genBtn) { genBtn.disabled = true; genBtn.textContent = '...'; }
+            try {
+                var res = await fetch('/api/admin/licenses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, tier, seats, expiry: tier === 'PERPETUAL' ? null : expiry, customer })
+                });
+                if (!res.ok) { gpAlert('Failed to generate license'); return; }
+                closeModal('create-modal');
+                document.getElementById('new-key').value = '';
+                document.getElementById('new-customer').value = '';
+                document.getElementById('new-seats').value = '1';
+                document.getElementById('new-tier').value = 'PERPETUAL';
+                onTierChange();
+                await loadDashboard();
+            } catch (e) {
+                gpAlert('Failed to generate license');
+            } finally {
+                if (genBtn) { genBtn.disabled = false; genBtn.textContent = 'Generate'; }
+            }
+        }
+
+        // HTML escaping for user-supplied content
+        function esc(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
+
+        // CSV EXPORT
+        var CSV_NEWLINE = String.fromCharCode(10);
+        function exportCSV(headers, rows, filename) {
+            var lines = [headers.join(',')];
+            rows.forEach(function(row) {
+                lines.push(row.map(function(cell) {
+                    var s = String(cell == null ? '' : cell);
+                    // Prevent CSV formula injection: prefix dangerous first chars with a single quote
+                    if (s.length > 0 && ('=+-@\t'.indexOf(s.charAt(0)) >= 0 || s.charCodeAt(0) === 13)) s = "'" + s;
+                    s = s.replace(/"/g, '""');
+                    return s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf(CSV_NEWLINE) >= 0 ? '"' + s + '"' : s;
+                }).join(','));
+            });
+            var a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join(CSV_NEWLINE));
+            a.download = filename;
+            a.click();
+        }
+
+        function exportLicensesCSV() {
+            var headers = ['License Key', 'Customer', 'Tier', 'Seats Used', 'Seat Limit', 'Expiry', 'Status', 'Last Active'];
+            var now = new Date();
+            var rows = filteredLicenses.map(function(l) {
+                var isExpired = l.expiry_date && new Date(l.expiry_date) < now;
+                var status = !l.is_active ? 'REVOKED' : isExpired ? 'EXPIRED' : 'ACTIVE';
+                var customer = l.customer_info || '';
+                try { if (l.customer_info && l.customer_info.startsWith('{')) customer = JSON.parse(l.customer_info).email || customer; } catch(e) {}
+                return [l.license_key, customer, l.tier, l.seats_used || 0, l.seat_limit, l.expiry_date || 'Perpetual', status, l.last_active_date || 'Never'];
+            });
+            exportCSV(headers, rows, 'gamepinned-licenses-' + new Date().toISOString().slice(0,10) + '.csv');
+        }
+
+        // AUDIT LOG
+        var allAuditLog = [];
+        var alState = { page: 1, size: 50 };
+
+        function alChangePage(delta) { alState.page += delta; renderAuditLog(allAuditLog); }
+        function alChangeSize(v) { alState.size = parseInt(v); alState.page = 1; renderAuditLog(allAuditLog); }
+
+        function renderAuditLog(items) {
+            pgApply(alState, items, 'audit-log-tbody', function(row) {
+                var details = '';
+                try { var d2 = JSON.parse(row.details || '{}'); details = Object.keys(d2).slice(0, 3).map(function(k) { return k + ': ' + d2[k]; }).join(', '); } catch(e) {}
+                var actionColor = row.action.indexOf('delete') >= 0 ? '#FF6B6B' : row.action.indexOf('revoke') >= 0 ? '#FFA726' : 'rgba(255,255,255,0.7)';
+                return '<tr>' +
+                    '<td style="font-size:0.85em;white-space:nowrap;">' + parseUtcDate(row.timestamp).toLocaleString() + '</td>' +
+                    '<td><span style="color:' + actionColor + ';font-weight:600;">' + row.action + '</span></td>' +
+                    '<td style="font-size:0.85em;">' + (row.target_id || '-') + '</td>' +
+                    '<td style="font-size:0.8em;color:rgba(255,255,255,0.6);">' + details + '</td>' +
+                    '</tr>';
+            }, 'al-pg-bar', '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.5);">You haven&#39;t done anything. Impressive.</td></tr>', 4);
+        }
+
+        async function loadAuditLog() {
+            try {
+                var response = await fetch('/api/admin/audit-log', { headers: {} });
+                if (!response.ok) throw new Error('Failed to load audit log');
+                var data = await response.json();
+                allAuditLog = data.audit_log || [];
+                alState.page = 1;
+                renderAuditLog(allAuditLog);
+            } catch (error) {
+                console.error('Failed to load audit log:', error);
+            }
+        }
+
+        // ================================================================
+        // NEWSLETTER SUBSCRIBERS
+        // ================================================================
+        var allNewsletterSubs = [];
+        var nlState = { page: 1, size: 50 };
+
+        function nlChangePage(delta) { nlState.page += delta; renderNewsletter(allNewsletterSubs); }
+        function nlChangeSize(v) { nlState.size = parseInt(v); nlState.page = 1; renderNewsletter(allNewsletterSubs); }
+
+        function renderNewsletter(items) {
+            pgApply(nlState, items || [], 'newsletter-tbody', function(s) {
+                var emailEsc = (s.email || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                var sourceEsc = (s.source || 'unknown').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                var dateStr = s.subscribed_at ? parseUtcDate(s.subscribed_at).toLocaleString() : '';
+                return '<tr>' +
+                    '<td style="font-weight:500;">' + emailEsc + '</td>' +
+                    '<td><span style="color:#4FC3F7;font-size:0.85rem;">' + sourceEsc + '</span></td>' +
+                    '<td style="color:rgba(255,255,255,0.5);font-size:0.85rem;">' + dateStr + '</td>' +
+                    '</tr>';
+            }, 'nl-pg-bar', '<tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.4);">Nobody signed up. Yet.</td></tr>', 3);
+        }
+
+        async function loadNewsletter() {
+            var tbody = document.getElementById('newsletter-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>';
+            try {
+                var res = await fetch('/api/admin/newsletter');
+                if (!res.ok) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#FF6B6B;">Failed to load subscribers</td></tr>';
+                    return;
+                }
+                var data = await res.json();
+                allNewsletterSubs = data.subscribers || [];
+                nlState.page = 1;
+
+                var countEl = document.getElementById('nl-count');
+                if (countEl) countEl.textContent = allNewsletterSubs.length + ' subscriber' + (allNewsletterSubs.length !== 1 ? 's' : '');
+
+                renderNewsletter(allNewsletterSubs);
+            } catch(e) {
+                console.error('loadNewsletter error:', e);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#FF6B6B;">Error loading subscribers</td></tr>';
+            }
+        }
+
+        // FEEDBACK SUBMISSIONS
+        var allFeedbackItems = [];
+
+        async function loadFeedbackSubmissions() {
+            var tbody = document.getElementById('feedback-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>';
+            try {
+                var res = await fetch('/api/admin/feedback');
+                if (!res.ok) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#FF6B6B;">Failed to load submissions</td></tr>';
+                    return;
+                }
+                var data = await res.json();
+                allFeedbackItems = data.submissions || [];
+                var countEl = document.getElementById('fb-count');
+                if (countEl) countEl.textContent = allFeedbackItems.length > 0 ? '(' + allFeedbackItems.length + ' total)' : '';
+                if (!allFeedbackItems.length) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.4);">No submissions yet.</td></tr>';
+                    return;
+                }
+                var typeColors = { 'Bug Report': '#ef5350', 'Feature Request': '#42a5f5', 'Platform Request': '#ab47bc', 'General Feedback': '#66bb6a', 'Other': '#888' };
+                if (tbody) tbody.innerHTML = allFeedbackItems.map(function(s) {
+                    var tc = typeColors[s.feedback_type] || '#888';
+                    var dateStr = s.submitted_at ? s.submitted_at.split('T')[0] : '';
+                    return '<tr>' +
+                        '<td><span class="badge" style="background:' + tc + '22;color:' + tc + ';border:1px solid ' + tc + '44;">' + esc(s.feedback_type) + '</span></td>' +
+                        '<td>' + esc(s.subject) + '</td>' +
+                        '<td>' + esc(s.name) + '</td>' +
+                        '<td>' + (s.email ? esc(s.email) : '<span style="color:rgba(255,255,255,0.3);">-</span>') + '</td>' +
+                        '<td style="white-space:nowrap;color:rgba(255,255,255,0.6);">' + dateStr + '</td>' +
+                        '<td><button class="btn btn-small btn-secondary" data-fb-id="' + s.id + '">View</button></td>' +
+                        '</tr>';
+                }).join('');
+            } catch(e) {
+                console.error('loadFeedbackSubmissions error:', e);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#FF6B6B;">Error loading submissions</td></tr>';
+            }
+        }
+
+        // Delegated handler for feedback "View" buttons
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-fb-id]');
+            if (!btn) return;
+            var id = parseInt(btn.getAttribute('data-fb-id'));
+            var s = allFeedbackItems.find(function(x) { return x.id === id; });
+            if (!s) return;
+            document.getElementById('fb-modal-type').textContent = s.feedback_type || '';
+            document.getElementById('fb-modal-subject').textContent = s.subject || '';
+            document.getElementById('fb-modal-name').textContent = s.name || '';
+            document.getElementById('fb-modal-email').textContent = s.email || 'Not provided';
+            document.getElementById('fb-modal-platform').textContent = s.platform_name || '-';
+            document.getElementById('fb-modal-date').textContent = s.submitted_at ? s.submitted_at.replace('T', ' ').split('.')[0] : '';
+            document.getElementById('fb-modal-desc').textContent = s.description || '';
+            document.getElementById('feedback-detail-modal').style.display = 'flex';
+        });
+
+        // DIAGNOSTICS
+        var allDiagnosticReports = [];
+        var diagState = { page: 1, size: 50 };
+
+        function diagChangePage(delta) { diagState.page += delta; filterDiagnostics(); }
+        function diagChangeSize(v) { diagState.size = parseInt(v); diagState.page = 1; filterDiagnostics(); }
+
+        function filterDiagnostics() {
+            var searchInput = document.getElementById('diag-search');
+            var term = searchInput ? searchInput.value.toLowerCase() : '';
+            if (!term) {
+                diagState.page = 1;
+                renderDiagnostics(allDiagnosticReports);
+                return;
+            }
+            diagState.page = 1;
+            var filtered = allDiagnosticReports.filter(function(r) {
+                var hw = (r.hardware_id || '').toLowerCase();
+                var key = (r.raw_license_key || '').toLowerCase();
+                var ver = (r.app_version || '').toLowerCase();
+                return hw.indexOf(term) >= 0 || key.indexOf(term) >= 0 || ver.indexOf(term) >= 0;
+            });
+            renderDiagnostics(filtered);
+        }
+
+        async function loadDiagnostics() {
+            var tbody = document.getElementById('diagnostics-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>';
+            try {
+                var response = await fetch('/api/admin/diagnostics', { headers: {} });
+                if (!response.ok) throw new Error('Failed to load diagnostics');
+                allDiagnosticReports = await response.json();
+                diagState.page = 1;
+
+                // Wire up search input once
+                var searchInput = document.getElementById('diag-search');
+                if (searchInput && !searchInput.dataset.listenerAdded) {
+                    searchInput.addEventListener('input', filterDiagnostics);
+                    searchInput.dataset.listenerAdded = 'true';
+                }
+
+                filterDiagnostics();
+            } catch (error) {
+                console.error('Failed to load diagnostics:', error);
+                var tbody2 = document.getElementById('diagnostics-tbody');
+                if (tbody2) tbody2.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#FF6B6B;">Failed to load reports</td></tr>';
+            }
+        }
+
+        // ─── LOGS PAGE ────────────────────────────────────────────────────────────
+
+        function applyLogFilters() {
+            logCurrentOffset = 0;
+            loadLogs();
+        }
+
+        function clearLogFilters() {
+            document.getElementById('log-filter-level').value = '';
+            document.getElementById('log-filter-category').value = '';
+            document.getElementById('log-filter-search').value = '';
+            document.getElementById('log-filter-from').value = '';
+            document.getElementById('log-filter-to').value = '';
+            logCurrentOffset = 0;
+            loadLogs();
+        }
+
+        function setLogQuickFilter(level, category) {
+            document.getElementById('log-filter-level').value = level;
+            document.getElementById('log-filter-category').value = category;
+            document.getElementById('log-filter-search').value = '';
+            logCurrentOffset = 0;
+            loadLogs();
+        }
+
+        function toggleLogLive() {
+            var btn = document.getElementById('log-live-btn');
+            if (logLiveTimer) {
+                clearInterval(logLiveTimer);
+                logLiveTimer = null;
+                if (btn) btn.textContent = 'Live: Off';
+                if (btn) btn.style.borderColor = '';
+                if (btn) btn.style.color = '';
+            } else {
+                logLiveTimer = setInterval(function() { loadLogs(true); }, 15000);
+                if (btn) btn.textContent = 'Live: On';
+                if (btn) btn.style.borderColor = '#4CAF50';
+                if (btn) btn.style.color = '#4CAF50';
+                loadLogs();
+            }
+        }
+
+        function logChangePage(dir) {
+            var newOffset = logCurrentOffset + dir * logPageSize;
+            if (newOffset < 0) newOffset = 0;
+            if (newOffset >= logTotalRows) return;
+            logCurrentOffset = newOffset;
+            loadLogs();
+        }
+
+        function levelBadge(level) {
+            if (level === 'error') return '<span style="background:#3d0000;color:#ef5350;padding:2px 7px;border-radius:10px;font-size:0.75rem;font-weight:600;">ERROR</span>';
+            if (level === 'warn')  return '<span style="background:#2a1f00;color:#FFB300;padding:2px 7px;border-radius:10px;font-size:0.75rem;font-weight:600;">WARN</span>';
+            return '<span style="background:#0a2a12;color:#4CAF50;padding:2px 7px;border-radius:10px;font-size:0.75rem;font-weight:600;">INFO</span>';
+        }
+
+        function categoryBadge(cat) {
+            var colors = {
+                auth: '#4FC3F7', license: '#ce93d8', webhook: '#80cbc4',
+                download: '#a5d6a7', email: '#ffe082', rate_limit: '#ef9a9a',
+                cron: '#b0bec5', error: '#ef5350', system: '#90a4ae'
+            };
+            var c = colors[cat] || '#888';
+            return '<span style="background:rgba(255,255,255,0.06);color:' + c + ';padding:2px 7px;border-radius:10px;font-size:0.75rem;">' + esc(cat) + '</span>';
+        }
+
+        async function loadLogs(silent) {
+            var tbody = document.getElementById('logs-tbody');
+            if (!silent && tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>';
+            }
+
+            var level    = document.getElementById('log-filter-level').value;
+            var category = document.getElementById('log-filter-category').value;
+            var search   = document.getElementById('log-filter-search').value.trim();
+            var from     = document.getElementById('log-filter-from').value;
+            var to       = document.getElementById('log-filter-to').value;
+
+            var params = 'limit=' + logPageSize + '&offset=' + logCurrentOffset;
+            if (level)    params += '&level='    + encodeURIComponent(level);
+            if (category) params += '&category=' + encodeURIComponent(category);
+            if (search)   params += '&search='   + encodeURIComponent(search);
+            if (from)     params += '&from='     + encodeURIComponent(from);
+            if (to)       params += '&to='       + encodeURIComponent(to);
+
+            try {
+                var res = await fetch('/api/admin/logs?' + params);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                var data = await res.json();
+                var logs = data.logs || [];
+                logTotalRows = data.total || 0;
+
+                var count = document.getElementById('log-result-count');
+                if (count) count.textContent = logTotalRows.toLocaleString() + ' total';
+
+                var page = Math.floor(logCurrentOffset / logPageSize) + 1;
+                var totalPages = Math.ceil(logTotalRows / logPageSize) || 1;
+                var pageLabel = document.getElementById('log-page-label');
+                if (pageLabel) pageLabel.textContent = 'Page ' + page + ' of ' + totalPages;
+
+                var prevBtn = document.getElementById('log-prev-btn');
+                var nextBtn = document.getElementById('log-next-btn');
+                if (prevBtn) prevBtn.disabled = logCurrentOffset <= 0;
+                if (nextBtn) nextBtn.disabled = logCurrentOffset + logPageSize >= logTotalRows;
+
+                var t = document.getElementById('logs-tbody');
+                if (!t) return;
+
+                if (!logs.length) {
+                    t.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.4);">Nothing caught fire. Yet.</td></tr>';
+                    return;
+                }
+
+                var html = '';
+                for (var i = 0; i < logs.length; i++) {
+                    var row = logs[i];
+                    var ts = row.timestamp ? parseUtcDate(row.timestamp).toLocaleString() : '';
+                    var hasData = row.data && row.data !== 'null';
+                    var expandId = 'log-expand-' + row.id;
+                    html += '<tr style="cursor:' + (hasData ? 'pointer' : 'default') + ';" onclick="toggleLogExpand(' + row.id + ')">';
+                    html += '<td style="font-size:0.8rem;white-space:nowrap;color:rgba(255,255,255,0.5);">' + esc(ts) + '</td>';
+                    html += '<td>' + levelBadge(row.level) + '</td>';
+                    html += '<td>' + categoryBadge(row.category) + '</td>';
+                    html += '<td style="font-size:0.8rem;font-family:monospace;color:rgba(255,255,255,0.6);">' + esc(row.event) + '</td>';
+                    html += '<td style="font-size:0.85rem;">' + esc(row.message) + '</td>';
+                    html += '<td style="font-size:0.78rem;font-family:monospace;color:rgba(255,255,255,0.45);">' + esc(row.ip || '') + '</td>';
+                    html += '<td style="font-size:0.78rem;font-family:monospace;color:rgba(255,255,255,0.45);">' + esc(row.license_key || '') + '</td>';
+                    html += '<td style="text-align:center;">' + (hasData ? '<span style="color:rgba(255,255,255,0.3);font-size:0.75rem;">+</span>' : '') + '</td>';
+                    html += '</tr>';
+                    if (hasData) {
+                        html += '<tr id="' + expandId + '" style="display:none;"><td colspan="8" style="padding:0;">';
+                        html += '<pre style="margin:0;padding:10px 16px;background:rgba(0,0,0,0.3);font-size:0.78rem;color:rgba(255,255,255,0.6);border-top:1px solid rgba(255,255,255,0.06);white-space:pre-wrap;word-break:break-all;">';
+                        try {
+                            html += esc(JSON.stringify(JSON.parse(row.data), null, 2));
+                        } catch(e) {
+                            html += esc(row.data);
+                        }
+                        html += '</pre></td></tr>';
+                    }
+                }
+                t.innerHTML = html;
+            } catch (err) {
+                var t2 = document.getElementById('logs-tbody');
+                if (t2) t2.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#FF6B6B;">Failed to load logs</td></tr>';
+            }
+        }
+
+        function toggleLogExpand(id) {
+            var row = document.getElementById('log-expand-' + id);
+            if (!row) return;
+            row.style.display = row.style.display === 'none' ? '' : 'none';
+        }
+
+        async function loadLogStats() {
+            try {
+                var res = await fetch('/api/admin/logs/stats');
+                if (!res.ok) return;
+                var data = await res.json();
+                var byLevel = {};
+                (data.by_level || []).forEach(function(r) { byLevel[r.level] = r.count; });
+                var total = document.getElementById('log-stat-total');
+                var info  = document.getElementById('log-stat-info');
+                var warn  = document.getElementById('log-stat-warn');
+                var err   = document.getElementById('log-stat-error');
+                if (total) total.textContent = (data.today || 0).toLocaleString();
+                if (info)  info.textContent  = (byLevel['info']  || 0).toLocaleString();
+                if (warn)  warn.textContent  = (byLevel['warn']  || 0).toLocaleString();
+                if (err)   err.textContent   = (byLevel['error'] || 0).toLocaleString();
+            } catch(e) {}
+        }
+
+        // Search box: apply on Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('log-filter-search');
+            if (searchInput) {
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') applyLogFilters();
+                });
+            }
+        });
+
+        // UPDATES
+        async function loadUpdates() {
+            try {
+                const response = await fetch('/api/admin/updates', {
+                    headers: {}
+                });
+                const data = await response.json();
+                
+                if (data.updates) {
+                    allUpdatesData = data.updates;
+                    updState.page = 1;
+                    renderUpdatesTable(allUpdatesData);
+                }
+            } catch (error) {
+                console.error('Failed to load updates:', error);
+            }
+        }
+
+        function renderUpdatesTable(updates) {
+            pgApply(updState, updates || [], 'updates-table-body', function(update) {
+                var isActive = update.is_active === 1 || update.is_active === true;
+                var statusBadge = isActive
+                    ? '<span style="background:#4CAF50;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.8rem;">Live</span>'
+                    : '<span style="background:#888;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.8rem;">Draft</span>';
+                var activateBtn = !isActive
+                    ? '<button class="btn-small" onclick="activateUpdate(' + update.id + ', &quot;' + update.version + '&quot;)" style="margin-right:4px;">Activate</button>'
+                    : '';
+                var disableBtn = isActive
+                    ? '<button class="btn-small btn-secondary" onclick="disableUpdate(' + update.id + ', &quot;' + update.version + '&quot;)" style="margin-right:4px;">Disable</button>'
+                    : '';
+                return '<tr>' +
+                    '<td><strong>' + update.version + '</strong></td>' +
+                    '<td>' + (update.release_notes || 'No notes') + '</td>' +
+                    '<td>' + (update.required ? 'Yes' : 'No') + '</td>' +
+                    '<td>' + formatFileSize(update.file_size || 0) + '</td>' +
+                    '<td>' + parseUtcDate(update.upload_date).toLocaleDateString() + '</td>' +
+                    '<td>' + statusBadge + '</td>' +
+                    '<td>' + activateBtn + disableBtn + '<button class="btn-small btn-secondary" onclick="downloadUpdate(' + update.id + ')" style="margin-right:4px;" title="Admin-only download (presigned, expires 15 min)">Download</button><button class="btn-small btn-error" onclick="deleteUpdate(' + update.id + ', &quot;' + update.version + '&quot;)">Delete</button></td>' +
+                    '</tr>';
+            }, 'upd-pg-bar', '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.4);">Still on v1. Living dangerously.</td></tr>', 7);
+        }
+
+        async function activateUpdate(id, version) {
+            var btn = event && event.target;
+            gpConfirm('Activate v' + version + '? This makes it live for all clients.', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    await fetch('/api/admin/updates/' + id + '/activate', { method: 'POST' });
+                    await loadUpdates();
+                } catch (error) {
+                    console.error('Failed to activate update:', error);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Activate'; }
+                }
+            });
+        }
+
+        async function disableUpdate(id, version) {
+            var btn = event && event.target;
+            gpConfirm('Disable v' + version + '? Direct URL downloads will return 404 immediately.', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    await fetch('/api/admin/updates/' + id + '/deactivate', { method: 'POST' });
+                    await loadUpdates();
+                } catch (error) {
+                    console.error('Failed to disable update:', error);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Disable'; }
+                }
+            });
+        }
+
+        async function downloadUpdate(id) {
+            try {
+                var resp = await fetch('/api/admin/updates/' + id + '/download-token', { method: 'POST' });
+                if (!resp.ok) { gpAlert('Failed to get download link (status ' + resp.status + ')'); return; }
+                var data = await resp.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    gpAlert('Failed to get download link');
+                }
+            } catch (e) {
+                gpAlert('Error: ' + e.message);
+            }
+        }
+
+        async function deleteUpdate(id, version) {
+            var btn = event && event.target;
+            gpConfirm('Delete update ' + version + '?', async function() {
+            if (btn) { btn.disabled = true; btn.textContent = '...'; }
+            try {
+                await fetch('/api/admin/updates/' + id, { method: 'DELETE' });
+                await loadUpdates();
+            } catch (error) {
+                console.error('Failed to delete update:', error);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+            }
+            });
+        }
+
+        function openUpdateModal() { 
+            document.getElementById('update-modal').style.display = 'flex'; 
+        }
+
+        document.getElementById('update-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('update-file');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('version', document.getElementById('update-version').value);
+            formData.append('required', document.getElementById('update-required').checked);
+            formData.append('is_draft', document.getElementById('update-draft').checked);
+            formData.append('releaseNotes', document.getElementById('update-notes').value);
+            
+            const btn = document.getElementById('upload-submit-btn');
+            const progressContainer = document.getElementById('upload-progress-container');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressText = document.getElementById('upload-progress-text');
+
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Starting upload (0%)...';
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/admin/updates', true);
+            // Cookie auth is sent automatically by the browser
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressText.textContent = 'Uploading (' + percent + '%)... ' + 
+                                            formatFileSize(e.loaded) + ' of ' + formatFileSize(e.total);
+                }
+            };
+
+            xhr.onload = () => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && result.success) {
+                        progressText.textContent = 'Upload complete!';
+                        setTimeout(() => {
+                            gpAlert('Update ' + result.version + ' uploaded successfully!');
+                            closeModal('update-modal');
+                            loadUpdates();
+                            document.getElementById('update-form').reset();
+                            progressContainer.style.display = 'none';
+                        }, 500);
+                    } else {
+                        gpAlert('Upload failed: ' + (result.message || result.error || 'Unknown error'));
+                        progressContainer.style.display = 'none';
+                    }
+                } catch (err) {
+                    gpAlert('Upload failed: Invalid server response');
+                    progressContainer.style.display = 'none';
+                }
+            };
+
+            xhr.onerror = () => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                gpAlert('Upload failed: Something broke. Classic.');
+                progressContainer.style.display = 'none';
+            };
+
+            xhr.send(formData);
+        });
+
+        // SECURITY MONITOR
+        var allRateLimits = [];
+        var rlState = { page: 1, size: 50 };
+
+        function rlChangePage(delta) { rlState.page += delta; renderRateLimits(allRateLimits); }
+        function rlChangeSize(v) { rlState.size = parseInt(v); rlState.page = 1; renderRateLimits(allRateLimits); }
+
+        function renderRateLimits(items) {
+            pgApply(rlState, items, 'rate-limits-tbody', function(limit) {
+                var now = new Date();
+                var blockedUntil = limit.blocked_until ? new Date(limit.blocked_until) : null;
+                var isBlocked = blockedUntil && blockedUntil > now;
+                var statusLabel = isBlocked ? 'BLOCKED' : (limit.attempts > 0 ? 'Flagged' : 'OK');
+                var statusClass = isBlocked ? 'badge-inactive' : (limit.attempts > 3 ? 'badge-pro' : 'badge-active');
+                var endpointLabel = limit.endpoint.replace('/api/', '');
+                return '<tr>' +
+                    '<td style="font-family:monospace;">' + limit.ip_address + '</td>' +
+                    '<td><span class="badge">' + endpointLabel + '</span></td>' +
+                    '<td>' + limit.attempts + '</td>' +
+                    '<td>' + parseUtcDate(limit.first_attempt).toLocaleString() + '</td>' +
+                    '<td>' + parseUtcDate(limit.last_attempt).toLocaleString() + '</td>' +
+                    '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td>' +
+                        (isBlocked
+                            ? '<button class="btn-small" onclick="unblockIPAddress(' + limit.id + ')">Unblock</button>'
+                            : '<button class="btn-small btn-secondary" onclick="unblockIPAddress(' + limit.id + ')">Clear</button>') +
+                    '</td>' +
+                    '</tr>';
+            }, 'rl-pg-bar', '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.5);">Either safe or they&#39;re sneaky.</td></tr>', 7);
+        }
+
+        async function loadRateLimits() {
+            try {
+                const response = await fetch('/api/admin/rate-limits', { headers: {} });
+                if (!response.ok) throw new Error('Failed to load rate limits');
+                const data = await response.json();
+                allRateLimits = data.rate_limits || [];
+                rlState.page = 1;
+                renderRateLimits(allRateLimits);
+            } catch (error) {
+                console.error('Failed to load rate limits:', error);
+                var t = document.getElementById('rate-limits-tbody');
+                if (t) t.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#FF6B6B;">Failed to load. Try refreshing.</td></tr>';
+            }
+        }
+
+        async function unblockIPAddress(id) {
+            var btn = event && event.target;
+            gpConfirm('Unblock this IP address?', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    await fetch('/api/admin/rate-limits/' + id + '/unblock', { method: 'POST' });
+                    await loadRateLimits();
+                } catch (error) {
+                    console.error('Failed to unblock IP:', error);
+                    gpAlert('Failed to unblock IP');
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Unblock'; }
+                }
+            });
+        }
+
+        // UTILITIES
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Custom confirm dialog — replaces native confirm() throughout the dashboard
+        function gpConfirm(message, onConfirm, title) {
+            document.getElementById('gp-confirm-title').textContent = title || 'Are you sure?';
+            document.getElementById('gp-confirm-msg').textContent = message;
+            var okBtn = document.getElementById('gp-confirm-ok');
+            var newBtn = okBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newBtn, okBtn);
+            newBtn.addEventListener('click', function() {
+                closeModal('gp-confirm-modal');
+                onConfirm();
+            });
+            document.getElementById('gp-confirm-modal').style.display = 'flex';
+        }
+
+        // Custom alert dialog — replaces native alert() throughout the dashboard
+        function gpAlert(message) {
+            document.getElementById('gp-alert-msg').textContent = message;
+            document.getElementById('gp-alert-modal').style.display = 'flex';
+        }
+
+        // Load initial data (deferred so dashboard renders first)
+        setTimeout(function() {
+            loadUpdates();
+
+            loadAuditLog();
+        }, 1000);
+
+        // ================================================================
+        // FEATURE 1: INSTALLATION HEALTH STATUS
+        // ================================================================
+        var licenseHealthMap = {};
+
+        // ================================================================
+        // FEATURE 2: GLOBAL SEARCH
+        // ================================================================
+        var searchDebounceTimer = null;
+        var searchBar = document.getElementById('global-search-bar');
+        var searchDropdown = document.getElementById('search-results-dropdown');
+
+        if (searchBar) {
+            searchBar.addEventListener('input', function() {
+                clearTimeout(searchDebounceTimer);
+                var q = searchBar.value.trim();
+                if (!q || q.length < 2) {
+                    searchDropdown.style.display = 'none';
+                    searchDropdown.innerHTML = '';
+                    return;
+                }
+                searchDebounceTimer = setTimeout(function() { runGlobalSearch(q); }, 300);
+            });
+
+            searchBar.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    searchDropdown.style.display = 'none';
+                    searchBar.value = '';
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!searchBar.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+        }
+
+        async function runGlobalSearch(q) {
+            try {
+                var res = await fetch('/api/admin/search?q=' + encodeURIComponent(q));
+                if (!res.ok) return;
+                var data = await res.json();
+                renderSearchResults(data, q);
+            } catch(e) {}
+        }
+
+        function renderSearchResults(data, q) {
+            var licenses = data.licenses || [];
+            var hardware = data.hardware || [];
+            if (!licenses.length && !hardware.length) {
+                searchDropdown.innerHTML = '<div class="search-result-item" style="color:rgba(255,255,255,0.4);">Nothing found for &quot;' + esc(q) + '&quot;</div>';
+                searchDropdown.style.display = 'block';
+                return;
+            }
+            var html = '';
+            if (licenses.length) {
+                html += '<div style="padding:8px 16px;font-size:0.75rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;">Licenses</div>';
+                licenses.forEach(function(l) {
+                    var customer = '';
+                    try {
+                        if (l.customer_info && l.customer_info.charAt(0) === '{') {
+                            customer = JSON.parse(l.customer_info).email || l.customer_info;
+                        } else {
+                            customer = l.customer_info || '';
+                        }
+                    } catch(e) { customer = l.customer_info || ''; }
+                    var statusColor = l.is_active ? '#4CAF50' : '#FF4B4B';
+                    html += '<div class="search-result-item" data-goto-license="' + l.id + '">' +
+                        '<div style="font-weight:600;font-family:monospace;">' + esc(l.license_key) + '</div>' +
+                        '<div style="font-size:0.82rem;color:rgba(255,255,255,0.55);">' +
+                            '<span class="badge badge-pro" style="font-size:0.7rem;">' + esc(l.tier) + '</span> ' +
+                            (customer ? esc(customer) : '') +
+                            ' <span style="color:' + statusColor + ';margin-left:8px;">' + (l.is_active ? 'Active' : 'Revoked') + '</span>' +
+                        '</div>' +
+                    '</div>';
+                });
+            }
+            if (hardware.length) {
+                html += '<div style="padding:8px 16px;font-size:0.75rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;">Hardware Matches</div>';
+                hardware.forEach(function(h) {
+                    html += '<div class="search-result-item" data-goto-license-key="' + esc(h.license_key) + '">' +
+                        '<div style="font-family:monospace;font-size:0.82rem;">' + esc(h.hardware_id.substring(0, 32)) + '...</div>' +
+                        '<div style="font-size:0.78rem;color:rgba(255,255,255,0.5);">License: ' + esc(h.license_key) + '</div>' +
+                    '</div>';
+                });
+            }
+            searchDropdown.innerHTML = html;
+            searchDropdown.style.display = 'block';
+        }
+
+        // Delegated click handler for search results
+        document.getElementById('search-results-dropdown').addEventListener('click', function(e) {
+            var item = e.target.closest('[data-goto-license]');
+            if (item) {
+                searchDropdown.style.display = 'none';
+                searchBar.value = '';
+                showPage('licenses');
+                // Highlight matching license in the table by scrolling to it
+                var licId = item.getAttribute('data-goto-license');
+                var licKey = '';
+                var found = allLicenses.find(function(l) { return String(l.id) === String(licId); });
+                if (found) {
+                    licKey = found.license_key;
+                    document.getElementById('license-search').value = licKey;
+                    applyFilters();
+                }
+                return;
+            }
+            var item2 = e.target.closest('[data-goto-license-key]');
+            if (item2) {
+                searchDropdown.style.display = 'none';
+                searchBar.value = '';
+                showPage('licenses');
+                var lk = item2.getAttribute('data-goto-license-key');
+                document.getElementById('license-search').value = lk;
+                applyFilters();
+            }
+        });
+
+        // ================================================================
+        // FEATURE 3: CUSTOMER NOTES
+        // ================================================================
+        function openNotesModal(id, currentNotes) {
+            document.getElementById('notes-license-id').value = id;
+            document.getElementById('notes-textarea').value = currentNotes || '';
+            document.getElementById('notes-modal').style.display = 'flex';
+        }
+
+        async function saveNotes() {
+            var id = document.getElementById('notes-license-id').value;
+            var notes = document.getElementById('notes-textarea').value;
+            try {
+                var res = await fetch('/api/admin/licenses/' + id + '/notes', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes: notes })
+                });
+                if (!res.ok) { gpAlert('Failed to save notes'); return; }
+                closeModal('notes-modal');
+                await loadDashboard();
+            } catch(e) {
+                gpAlert('Failed to save notes');
+            }
+        }
+
+        // ================================================================
+        // FEATURE 4: EXPIRING THIS MONTH
+        // ================================================================
+        async function loadExpiringThisMonth() {
+            try {
+                var res = await fetch('/api/admin/expiring');
+                if (!res.ok) return;
+                var data = await res.json();
+                allExpiringRows = data.expiring || [];
+                expState.page = 1;
+                renderExpiringThisMonth(allExpiringRows);
+            } catch(e) {}
+        }
+
+        function renderExpiringThisMonth(rows) {
+            var section = document.getElementById('expiring-month-section');
+            if (!rows.length) {
+                if (section) section.style.display = 'none';
+                return;
+            }
+            if (section) section.style.display = 'block';
+            var now = new Date();
+            pgApply(expState, rows, 'expiring-month-tbody', function(l) {
+                var daysLeft = Math.ceil((new Date(l.expiry_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                var daysColor = daysLeft <= 7 ? '#FF4B4B' : daysLeft <= 14 ? '#FFA726' : '#4CAF50';
+                var customer = '';
+                try {
+                    if (l.customer_info && l.customer_info.charAt(0) === '{') {
+                        customer = JSON.parse(l.customer_info).email || l.customer_info;
+                    } else {
+                        customer = l.customer_info || '---';
+                    }
+                } catch(e) { customer = l.customer_info || '---'; }
+                return '<tr>' +
+                    '<td style="font-weight:600;font-family:monospace;">' + l.license_key + '</td>' +
+                    '<td style="font-size:0.85rem;">' + esc(customer) + '</td>' +
+                    '<td>' + l.expiry_date + '</td>' +
+                    '<td style="color:' + daysColor + ';font-weight:600;">' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + '</td>' +
+                    '<td><button class="btn btn-small expiring-row-extend" data-extend-id="' + l.id + '">+30 Days</button></td>' +
+                    '</tr>';
+            }, 'exp-pg-bar', '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.4);">Everyone paid up. Rare.</td></tr>', 5);
+        }
+
+        // Delegated handler for "Extend 30 Days" buttons
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-extend-id]');
+            if (!btn) return;
+            var id = btn.getAttribute('data-extend-id');
+            extendLicense30Days(id, btn);
+        });
+
+        async function extendLicense30Days(id, btn) {
+            var found = allLicenses.find(function(l) { return String(l.id) === String(id); });
+            if (!found) return;
+            var currentExpiry = found.expiry_date ? new Date(found.expiry_date) : new Date();
+            currentExpiry.setDate(currentExpiry.getDate() + 30);
+            var newExpiry = currentExpiry.toISOString().split('T')[0];
+            gpConfirm('Extend license to ' + newExpiry + '?', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    var res = await fetch('/api/admin/licenses/' + id + '/update-tier', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tier: 'SUBSCRIPTION', expiry_date: newExpiry })
+                    });
+                    if (!res.ok) { gpAlert('Failed to extend license'); return; }
+                    await loadDashboard();
+                    await loadExpiringThisMonth();
+                } catch(e) {
+                    gpAlert('Failed to extend license');
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = '+30 Days'; }
+                }
+            });
+        }
+
+        // ================================================================
+        // DIAGNOSTIC LOG VIEWER
+
+        // ================================================================
+        // FEATURE 7: DIAGNOSTIC LOG VIEWER
+        // ================================================================
+        function copyDiagLog() {
+            var content = document.getElementById('diag-log-content');
+            var btn = document.getElementById('diag-copy-btn');
+            if (!content || !btn) return;
+            navigator.clipboard.writeText(content.textContent || '').then(function() {
+                btn.textContent = 'Copied!';
+                setTimeout(function() { btn.textContent = 'Copy All'; }, 2000);
+            }).catch(function() {
+                btn.textContent = 'Failed';
+                setTimeout(function() { btn.textContent = 'Copy All'; }, 2000);
+            });
+        }
+
+        async function viewDiagnosticLog(id, hwId, submittedAt) {
+            var modal = document.getElementById('diag-log-modal');
+            var content = document.getElementById('diag-log-content');
+            var meta = document.getElementById('diag-log-meta');
+            content.textContent = 'Hold on...';
+            meta.textContent = 'HW: ' + hwId + ', submitted: ' + parseUtcDate(submittedAt).toLocaleString();
+            modal.style.display = 'flex';
+            try {
+                var res = await fetch('/api/admin/diagnostics/' + id + '/content');
+                if (!res.ok) {
+                    content.textContent = 'Failed to load log content.';
+                    return;
+                }
+                var data = await res.json();
+                content.textContent = data.content || '(empty)';
+            } catch(e) {
+                content.textContent = 'Error loading log: ' + e.message;
+            }
+        }
+
+        function renderDiagnostics(reports) {
+            // Reset select-all checkbox and hide bulk button when re-rendering
+            var checkAll = document.getElementById('diag-check-all');
+            if (checkAll) checkAll.checked = false;
+            pgApply(diagState, reports || [], 'diagnostics-tbody', function(r) {
+                var hwFull = r.hardware_id || 'N/A';
+                var keyFull = r.raw_license_key || '';
+                var hw = r.hardware_id ? (r.hardware_id.substring(0, 16) + '...') : 'N/A';
+                var key = r.raw_license_key ? (r.raw_license_key.substring(0, 12) + '...') : 'FREE';
+                var size = r.file_size ? (Math.round(r.file_size / 1024) + ' KB') : 'N/A';
+                var date = r.submitted_at ? parseUtcDate(r.submitted_at).toLocaleString() : 'N/A';
+                var ver = r.app_version || 'N/A';
+                // Metadata is submitted to a public endpoint. pgApply uses innerHTML,
+                // so encode every attacker-controlled value used as text or an attribute.
+                var hwFullEsc = esc(hwFull);
+                var keyFullEsc = esc(keyFull);
+                var hwEsc = esc(hw);
+                var keyEsc = esc(key);
+                var verEsc = esc(ver);
+                var submittedAtEsc = esc(r.submitted_at || '');
+                return '<tr>' +
+                    '<td style="width:32px;"><input type="checkbox" class="diag-row-check" data-diag-id="' + r.id + '"></td>' +
+                    '<td style="white-space:nowrap;font-size:0.85em;">' + date + '</td>' +
+                    '<td style="font-family:monospace;font-size:0.8em;cursor:pointer;" title="' + hwFullEsc + ' (click to copy)" data-copy="' + hwFullEsc + '">' + hwEsc + '</td>' +
+                    '<td style="font-family:monospace;font-size:0.8em;cursor:pointer;" title="' + esc(keyFull || 'FREE') + ' (click to copy)" data-copy="' + (keyFullEsc || keyEsc) + '">' + keyEsc + '</td>' +
+                    '<td>' + verEsc + '</td>' +
+                    '<td>' + size + '</td>' +
+                    '<td style="white-space:nowrap;">' +
+                        '<button class="btn btn-small btn-secondary" data-view-diag-id="' + r.id + '" data-view-diag-hw="' + hwFullEsc + '" data-view-diag-date="' + submittedAtEsc + '" style="margin-right:4px;">View</button>' +
+                        '<a href="/api/admin/diagnostics/' + r.id + '/download" class="btn btn-small" style="text-decoration:none;display:inline-block;margin-right:4px;">Download</a>' +
+                        '<button class="btn btn-small" style="background:#3d0000;border-color:#7a0000;color:#ff6b6b;" data-del-diag-id="' + r.id + '">Delete</button>' +
+                    '</td>' +
+                    '</tr>';
+            }, 'diag-pg-bar', '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.4);">Nothing found. Move on.</td></tr>', 7);
+            updateDiagSelCount();
+        }
+
+        function updateDiagSelCount() {
+            var checks = document.querySelectorAll('.diag-row-check:checked');
+            var count = checks.length;
+            var btn = document.getElementById('diag-delete-selected-btn');
+            var countEl = document.getElementById('diag-sel-count');
+            if (btn) btn.style.display = count > 0 ? '' : 'none';
+            if (countEl) countEl.textContent = String(count);
+        }
+
+        // Select-all checkbox
+        document.addEventListener('change', function(e) {
+            var el = e.target;
+            if (el.id === 'diag-check-all') {
+                var checks = document.querySelectorAll('.diag-row-check');
+                checks.forEach(function(c) { c.checked = el.checked; });
+                updateDiagSelCount();
+            } else if (el.classList.contains('diag-row-check')) {
+                var allChecks = document.querySelectorAll('.diag-row-check');
+                var checkedChecks = document.querySelectorAll('.diag-row-check:checked');
+                var checkAll2 = document.getElementById('diag-check-all');
+                if (checkAll2) checkAll2.checked = allChecks.length === checkedChecks.length;
+                updateDiagSelCount();
+            }
+        });
+
+        async function deleteSelectedDiagnostics() {
+            var checks = document.querySelectorAll('.diag-row-check:checked');
+            if (!checks.length) return;
+            gpConfirm('Delete ' + checks.length + ' report' + (checks.length > 1 ? 's' : '') + '? This is permanent. Like a tattoo, but worse.', async function() {
+                var ids = Array.from(document.querySelectorAll('.diag-row-check:checked')).map(function(c) { return c.getAttribute('data-diag-id'); });
+                var btn = document.getElementById('diag-delete-selected-btn');
+                if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+                var failed = 0;
+                for (var i = 0; i < ids.length; i++) {
+                    try {
+                        var r = await fetch('/api/admin/diagnostics/' + ids[i], { method: 'DELETE' });
+                        if (!r.ok) failed++;
+                        else allDiagnosticReports = allDiagnosticReports.filter(function(x) { return String(x.id) !== String(ids[i]); });
+                    } catch { failed++; }
+                }
+                if (btn) { btn.disabled = false; btn.textContent = 'Nuke Selected (0)'; btn.style.display = 'none'; }
+                var checkAll3 = document.getElementById('diag-check-all');
+                if (checkAll3) checkAll3.checked = false;
+                filterDiagnostics();
+                if (failed) gpAlert(failed + ' deletion(s) failed.');
+            });
+        }
+
+        // Delegated click for View diagnostic log buttons
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-view-diag-id]');
+            if (!btn) return;
+            viewDiagnosticLog(
+                btn.getAttribute('data-view-diag-id'),
+                btn.getAttribute('data-view-diag-hw'),
+                btn.getAttribute('data-view-diag-date')
+            );
+        });
+
+        // Delegated click for Delete diagnostic log buttons
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-del-diag-id]');
+            if (!btn) return;
+            var id = btn.getAttribute('data-del-diag-id');
+            gpConfirm('Delete this diagnostic report? This is permanent. Like a tattoo, but worse.', function() {
+            btn.disabled = true;
+            btn.textContent = '...';
+            fetch('/api/admin/diagnostics/' + id, { method: 'DELETE' })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Delete failed');
+                    allDiagnosticReports = allDiagnosticReports.filter(function(x) { return String(x.id) !== String(id); });
+                    filterDiagnostics();
+                })
+                .catch(function() {
+                    btn.disabled = false;
+                    btn.textContent = 'Delete';
+                    gpAlert('Failed to delete report.');
+                });
+            });
+        });
+
+        function changeLicensePage(delta) {
+            var totalPages = Math.max(1, Math.ceil(filteredLicenses.length / PAGE_SIZE));
+            currentPage = Math.min(Math.max(1, currentPage + delta), totalPages);
+            renderTable(filteredLicenses);
+        }
+
+        function renderTable(licenses) {
+            var totalPages = Math.max(1, Math.ceil(licenses.length / PAGE_SIZE));
+            if (currentPage > totalPages) currentPage = totalPages;
+            var start = (currentPage - 1) * PAGE_SIZE;
+            var pageSlice = licenses.slice(start, start + PAGE_SIZE);
+
+            // Update pagination controls
+            var info = document.getElementById('license-page-info');
+            var prev = document.getElementById('license-prev-btn');
+            var next = document.getElementById('license-next-btn');
+            var pagination = document.getElementById('license-pagination');
+            if (info) info.textContent = licenses.length > PAGE_SIZE
+                ? 'Showing ' + (start + 1) + '-' + Math.min(start + PAGE_SIZE, licenses.length) + ' of ' + licenses.length
+                : licenses.length + ' license' + (licenses.length !== 1 ? 's' : '');
+            if (prev) prev.disabled = currentPage <= 1;
+            if (next) next.disabled = currentPage >= totalPages;
+            if (pagination) pagination.style.display = licenses.length > PAGE_SIZE ? 'flex' : 'none';
+
+            var tbody = document.getElementById('license-table-body');
+            tbody.innerHTML = pageSlice.map(function(l) {
+                var expiryDate = l.expiry_date ? new Date(l.expiry_date) : null;
+                var now = new Date();
+                var isExpired = expiryDate && expiryDate < now;
+
+                var isCanceled = false;
+                var cancellationReason = null;
+                try {
+                    if (l.customer_info && l.customer_info.charAt(0) === '{') {
+                        var info2 = JSON.parse(l.customer_info);
+                        cancellationReason = info2.cancellation_reason;
+                        isCanceled = cancellationReason === 'subscription.canceled';
+                    }
+                } catch(e) {}
+
+                var statusLabel, statusClass;
+                if (!l.is_active) {
+                    statusLabel = 'REVOKED'; statusClass = 'badge-inactive';
+                } else if (isCanceled && isExpired) {
+                    statusLabel = 'EXPIRED'; statusClass = 'badge-inactive';
+                } else if (isCanceled && !isExpired) {
+                    var expiryStr = expiryDate ? expiryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                    statusLabel = 'CANCELED (Until ' + expiryStr + ')'; statusClass = 'badge-pro';
+                } else if (!isCanceled && isExpired) {
+                    statusLabel = 'EXPIRED'; statusClass = 'badge-inactive';
+                } else {
+                    statusLabel = 'ACTIVE'; statusClass = 'badge-active';
+                }
+
+                var customerDisplay = '---';
+                try {
+                    if (l.customer_info && l.customer_info.charAt(0) === '{') {
+                        var info3 = JSON.parse(l.customer_info);
+                        customerDisplay = '<div style="line-height:1.4">' +
+                            '<span style="font-weight:600">' + esc(info3.email || '---') + '</span>' +
+                            (info3.product ? '<br><span style="font-size:0.75rem;color:#999">' + esc(info3.product) + '</span>' : '') +
+                            (info3.source ? '<br><span style="font-size:0.7rem;color:#666;text-transform:uppercase">' + esc(info3.source) + '</span>' : '') +
+                            '</div>';
+                    } else {
+                        customerDisplay = esc(l.customer_info || '---');
+                    }
+                } catch(e) { customerDisplay = esc(l.customer_info || '---'); }
+
+                var lastActiveTd = '---';
+                if (l.last_active_date) {
+                    var lastSeen = parseUtcDate(l.last_active_date);
+                    var daysSince = Math.floor((Date.now() - lastSeen.getTime()) / (1000 * 60 * 60 * 24));
+                    var lastSeenStr = lastSeen.toLocaleDateString();
+                    if (daysSince > 14) {
+                        lastActiveTd = '<span style="color:#FF6B6B;" title="No device sync in ' + daysSince + ' days">&#9888;&#65039; ' + lastSeenStr + '</span>';
+                    } else {
+                        lastActiveTd = '<span style="color:#4CAF50;">' + lastSeenStr + '</span>';
+                    }
+                }
+
+                // Health dot — show nothing until health data has loaded (avoids red flash on initial render)
+                var healthColor = licenseHealthMap[l.license_key] || (licenseHealthLoaded ? 'red' : '');
+                var healthTitle = healthColor === 'green' ? 'Seen in last 24h' : (healthColor === 'yellow' ? 'Seen in last 7 days' : (healthColor === 'red' ? 'Not seen in 7+ days' : 'Hold on...'));
+                var healthDot = healthColor ? '<span class="health-dot health-' + healthColor + '" title="' + healthTitle + '"></span>' : '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.1);" title="Hold on..."></span>';
+
+                // Notes icon
+                var hasNotes = l.notes && l.notes.length > 0;
+                var notesIcon = '<span class="note-icon' + (hasNotes ? ' has-note' : '') + '" title="' + (hasNotes ? 'Has notes (click to edit)' : 'Add notes') + '" data-open-notes="' + l.id + '" data-notes-val="' + esc(l.notes || '') + '">&#128221;</span>';
+
+                return '<tr>' +
+                    '<td style="text-align:center;">' + healthDot + '</td>' +
+                    '<td style="font-weight:600;">' + l.license_key + notesIcon + '</td>' +
+                    '<td>' + customerDisplay + '</td>' +
+                    '<td><span class="badge ' + (l.tier === 'TRIAL' ? 'badge-trial' : (l.tier !== 'FREE' ? 'badge-pro' : '')) + '">' + l.tier + '</span></td>' +
+                    '<td>' + (l.seats_used || 0) + '/' + l.seat_limit +
+                        ' <button class="btn-small btn-secondary" style="padding:2px 8px;font-size:0.75rem;" onclick="editSeats(' + l.id + ', ' + l.seat_limit + ')">Edit</button>' +
+                    '</td>' +
+                    '<td>' + (l.expiry_date || 'Perpetual') + '</td>' +
+                    '<td>' + lastActiveTd + '</td>' +
+                    '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td>' +
+                        '<button class="btn-small btn-secondary" onclick="editLicenseTier(' + l.id + ', &quot;' + l.tier + '&quot;, &quot;' + (l.expiry_date || '') + '&quot;)">Edit Tier</button> ' +
+                        '<button class="btn-small btn-secondary" onclick="viewDevices(' + l.id + ', &quot;' + l.license_key + '&quot;)">Manage Seats</button> ' +
+                        '<button class="btn-small ' + (l.is_active ? 'btn-error' : '') + '" onclick="toggleLicense(event,' + l.id + ',' + l.is_active + ')">' +
+                            (l.is_active ? 'Revoke' : 'Restore') +
+                        '</button> ' +
+                        '<button class="btn-small btn-error" onclick="deleteLicense(event,' + l.id + ',&quot;' + l.license_key + '&quot;)">Delete</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        // Delegated click for notes icon in license table
+        document.addEventListener('click', function(e) {
+            var el = e.target.closest('[data-open-notes]');
+            if (!el) return;
+            var id = el.getAttribute('data-open-notes');
+            var val = el.getAttribute('data-notes-val') || '';
+            openNotesModal(id, val);
+        });
+
+        // ================================================================
+        // TRIAL MANAGEMENT
+        // ================================================================
+        var allTrials = [];
+        var trialsState = { page: 1, size: 50 };
+
+        function trialsChangePage(delta) { trialsState.page += delta; renderTrials(allTrials); }
+        function trialsChangeSize(v) { trialsState.size = parseInt(v); trialsState.page = 1; renderTrials(allTrials); }
+
+        async function loadTrials() {
+            var tbody = document.getElementById('trials-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>';
+            try {
+                var res = await fetch('/api/admin/trials');
+                if (!res.ok) { if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#FF6B6B;">Failed to load trials</td></tr>'; return; }
+                var data = await res.json();
+                allTrials = data.trials || [];
+                trialsState.page = 1;
+                var s = data.stats || {};
+                var el = function(id) { return document.getElementById(id); };
+                if (el('trial-stat-total')) el('trial-stat-total').textContent = s.total || 0;
+                if (el('trial-stat-active')) el('trial-stat-active').textContent = s.active || 0;
+                if (el('trial-stat-expiring')) el('trial-stat-expiring').textContent = s.expiring_7d || 0;
+                if (el('trial-stat-converted')) el('trial-stat-converted').textContent = s.converted || 0;
+                if (el('trial-stat-rate')) el('trial-stat-rate').textContent = s.conversion_rate || '0%';
+                renderTrials(allTrials);
+            } catch(e) {
+                console.error('loadTrials error:', e);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#FF6B6B;">Error loading trials</td></tr>';
+            }
+        }
+
+        function renderTrials(trials) {
+            pgApply(trialsState, trials || [], 'trials-tbody', function(t) {
+                var daysLeft = t.days_left;
+                var daysCell;
+                if (!t.is_active) {
+                    daysCell = '<span style="color:#666;">Revoked</span>';
+                } else if (daysLeft === null || daysLeft === undefined) {
+                    daysCell = '<span style="color:#666;">-</span>';
+                } else if (daysLeft < 0) {
+                    daysCell = '<span style="color:#FF6B6B;">Expired</span>';
+                } else if (daysLeft <= 1) {
+                    daysCell = '<span style="color:#FF6B35;font-weight:700;">' + daysLeft + 'd</span>';
+                } else if (daysLeft <= 3) {
+                    daysCell = '<span style="color:#FFB300;font-weight:600;">' + daysLeft + 'd</span>';
+                } else {
+                    daysCell = '<span style="color:#4CAF50;">' + daysLeft + 'd</span>';
+                }
+                var activatedDot = t.activated
+                    ? '<span style="color:#4CAF50;" title="Key has been activated">&#10003; Yes</span>'
+                    : '<span style="color:#666;" title="Key not yet entered">No</span>';
+                var reminderBadge = t.reminder_count === 0
+                    ? '<span style="color:#666;">None</span>'
+                    : '<span style="color:#4FC3F7;">' + t.reminder_count + ' sent</span>';
+                var convertedBadge = t.converted
+                    ? '<span style="color:#4CAF50;" title="' + (t.converted_to_key || '') + '">&#10003; Yes</span>'
+                    : '<span style="color:#666;">No</span>';
+                var keyShort = t.license_key ? (t.license_key.length > 12 ? t.license_key.substring(0, 8) + '...' : t.license_key) : '';
+                var createdStr = t.created_at ? parseUtcDate(t.created_at).toLocaleDateString() : '';
+                var expiryStr = t.expiry_date ? parseUtcDate(t.expiry_date).toLocaleDateString() : '';
+                var emailEsc = (t.email || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                return '<tr>' +
+                    '<td style="font-weight:500;">' + emailEsc + '</td>' +
+                    '<td style="font-family:monospace;font-size:0.85rem;" title="' + (t.license_key || '') + '">' + keyShort + '</td>' +
+                    '<td>' + createdStr + '</td>' +
+                    '<td>' + expiryStr + '</td>' +
+                    '<td>' + daysCell + '</td>' +
+                    '<td>' + activatedDot + '</td>' +
+                    '<td>' + reminderBadge + '</td>' +
+                    '<td>' + convertedBadge + '</td>' +
+                    '<td>' +
+                        '<button class="btn-small btn-secondary" data-trial-extend="' + t.id + '" style="margin-right:4px;">Buy More Time</button>' +
+                        (t.is_active ? '<button class="btn-small btn-error" data-trial-revoke="' + t.id + '" style="margin-right:4px;">Revoke</button>' : '') +
+                        '<button class="btn-small btn-secondary" data-trial-resend="' + t.id + '">They Lost It Again</button>' +
+                    '</td>' +
+                '</tr>';
+            }, 'trials-pg-bar', '<tr><td colspan="9" style="text-align:center;color:rgba(255,255,255,0.4);">Nobody&#39;s taken the bait.</td></tr>', 9);
+        }
+
+        // Delegated click handlers for trial action buttons (no inline onclick, avoids escaping issues)
+        document.addEventListener('click', function(e) {
+            var extBtn = e.target.closest('[data-trial-extend]');
+            if (extBtn) { extendTrial(extBtn.getAttribute('data-trial-extend')); return; }
+            var revBtn = e.target.closest('[data-trial-revoke]');
+            if (revBtn) { revokeTrial(revBtn.getAttribute('data-trial-revoke')); return; }
+            var resBtn = e.target.closest('[data-trial-resend]');
+            if (resBtn) { resendTrialKey(resBtn.getAttribute('data-trial-resend')); return; }
+        });
+
+        async function extendTrial(id) {
+            var btn = event && event.target;
+            gpConfirm('Extend this trial by 7 days?', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    var res = await fetch('/api/admin/trials/' + id + '/extend', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ days: 7 })
+                    });
+                    if (res.ok) { await loadTrials(); } else { gpAlert('Failed to extend trial'); }
+                } catch(e) { gpAlert('Failed to extend trial'); }
+                finally { if (btn) { btn.disabled = false; btn.textContent = 'Extend +7d'; } }
+            });
+        }
+
+        async function revokeTrial(id) {
+            var btn = event && event.target;
+            gpConfirm('Revoke this trial? The license key will stop working immediately.', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    var res = await fetch('/api/admin/trials/' + id + '/revoke', { method: 'POST' });
+                    if (res.ok) { await loadTrials(); } else { gpAlert('Failed to revoke trial'); }
+                } catch(e) { gpAlert('Failed to revoke trial'); }
+                finally { if (btn) { btn.disabled = false; btn.textContent = 'Revoke'; } }
+            });
+        }
+
+        async function resendTrialKey(id) {
+            var btn = event && event.target;
+            gpConfirm('Re-send the trial license key email to this user?', async function() {
+                if (btn) { btn.disabled = true; btn.textContent = '...'; }
+                try {
+                    var res = await fetch('/api/admin/trials/' + id + '/resend', { method: 'POST' });
+                    if (res.ok) { gpAlert('Email sent successfully.'); } else { gpAlert('Failed to resend. No email on record?'); }
+                } catch(e) { gpAlert('Failed to resend email'); }
+                finally { if (btn) { btn.disabled = false; btn.textContent = 'They Lost It Again'; } }
+            });
+        }
+
+        // ================================================================
+        // DOWNLOAD ANALYTICS
+        // ================================================================
+        // ================================================================
+        // ================================================================
+        // UPDATES PAGINATION
+        // ================================================================
+        var allUpdatesData = [];
+        var updState = { page: 1, size: 50 };
+
+        function updChangePage(delta) { updState.page += delta; renderUpdatesTable(allUpdatesData); }
+        function updChangeSize(v) { updState.size = parseInt(v); updState.page = 1; renderUpdatesTable(allUpdatesData); }
+
+        // ================================================================
+        // EXPIRING THIS MONTH PAGINATION
+        // ================================================================
+        var allExpiringRows = [];
+        var expState = { page: 1, size: 50 };
+
+        function expChangePage(delta) { expState.page += delta; renderExpiringThisMonth(allExpiringRows); }
+        function expChangeSize(v) { expState.size = parseInt(v); expState.page = 1; renderExpiringThisMonth(allExpiringRows); }
+
+        // GENERIC PAGINATION HELPER
+        // ================================================================
+        function pgApply(state, items, tbodyId, renderRowFn, barId, emptyMsg, colCount) {
+            var tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
+            var total = items.length;
+            var totalPages = Math.max(1, Math.ceil(total / state.size));
+            state.page = Math.min(Math.max(1, state.page), totalPages);
+            var start = (state.page - 1) * state.size;
+            var slice = items.slice(start, start + state.size);
+            if (!items.length) {
+                tbody.innerHTML = emptyMsg || ('<tr><td colspan="' + (colCount || 4) + '" style="text-align:center;color:rgba(255,255,255,0.4);">No data</td></tr>');
+            } else {
+                tbody.innerHTML = slice.map(renderRowFn).join('');
+            }
+            var bar = document.getElementById(barId);
+            if (bar) {
+                var infoEl = document.getElementById(barId.replace('-bar', '-info'));
+                var prevEl = document.getElementById(barId.replace('-bar', '-prev'));
+                var nextEl = document.getElementById(barId.replace('-bar', '-next'));
+                if (infoEl) infoEl.textContent = total > 0 ? 'Showing ' + (start + 1) + '-' + Math.min(start + state.size, total) + ' of ' + total : '0 items';
+                if (prevEl) prevEl.disabled = state.page <= 1;
+                if (nextEl) nextEl.disabled = state.page >= totalPages;
+                bar.style.display = total > 10 ? 'flex' : 'none';
+            }
+        }
+
+        // ================================================================
+        // DOWNLOAD ANALYTICS
+        // ================================================================
+        var allDownloads = [];
+        var dlState = { page: 1, size: 50 };
+
+        function dlChangePage(delta) { dlState.page += delta; renderDownloadsTable(allDownloads); }
+        function dlChangeSize(v) { dlState.size = parseInt(v); dlState.page = 1; renderDownloadsTable(allDownloads); }
+
+        function renderDownloadsTable(items) {
+            pgApply(dlState, items, 'dl-recent-tbody', function(r) {
+                var flag = r.country && r.country.length === 2
+                    ? String.fromCodePoint(0x1F1E6 + r.country.charCodeAt(0) - 65) + String.fromCodePoint(0x1F1E6 + r.country.charCodeAt(1) - 65) + ' '
+                    : '';
+                var srcColor = r.source === 'website' ? '#4FC3F7' : r.source === 'autoupdate' ? '#4CAF50' : '#FFB300';
+                var ts = r.timestamp ? parseUtcDate(r.timestamp).toLocaleString() : '';
+                return '<tr>' +
+                    '<td style="font-size:0.85rem;color:rgba(255,255,255,0.6);">' + ts + '</td>' +
+                    '<td>' + flag + (r.country || 'XX') + '</td>' +
+                    '<td style="font-family:monospace;font-size:0.85rem;">' + esc(r.version || '') + '</td>' +
+                    '<td><span style="color:' + srcColor + ';font-size:0.85rem;">' + esc(r.source || 'direct') + '</span></td>' +
+                    '</tr>';
+            }, 'dl-pg-bar', '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.4);">Zero downloads. Very normal. Everything is fine.</td></tr>', 4);
+        }
+
+        async function loadDownloads() {
+            var tbody = document.getElementById('dl-recent-tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.4);">Hold on...</td></tr>';
+            try {
+                var res = await fetch('/api/admin/downloads');
+                if (!res.ok) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#FF6B6B;">Failed to load</td></tr>';
+                    return;
+                }
+                var d = await res.json();
+
+                var el = function(id) { return document.getElementById(id); };
+                if (el('dl-stat-total')) el('dl-stat-total').textContent = d.total || 0;
+                if (el('dl-stat-month')) el('dl-stat-month').textContent = d.this_month || 0;
+                if (el('dl-stat-today')) el('dl-stat-today').textContent = d.today || 0;
+                if (el('dl-stat-countries')) el('dl-stat-countries').textContent = d.unique_countries || 0;
+
+                // Daily chart
+                if (dlDailyChart) dlDailyChart.destroy();
+                var dailyCtx = document.getElementById('dl-daily-chart');
+                if (dailyCtx && d.daily && d.daily.length > 0) {
+                    dlDailyChart = new Chart(dailyCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: d.daily.map(function(r) { return r.date; }),
+                            datasets: [{
+                                label: 'Downloads',
+                                data: d.daily.map(function(r) { return r.count; }),
+                                backgroundColor: 'rgba(79,195,247,0.5)',
+                                borderColor: 'rgba(79,195,247,1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { color: 'rgba(255,255,255,0.7)', precision: 0 }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                                x: { ticks: { color: 'rgba(255,255,255,0.7)', maxTicksLimit: 10 }, grid: { display: false } }
+                            }
+                        }
+                    });
+                }
+
+                // Source doughnut chart
+                if (dlSourceChart) dlSourceChart.destroy();
+                var sourceCtx = document.getElementById('dl-source-chart');
+                if (sourceCtx && d.by_source && d.by_source.length > 0) {
+                    dlSourceChart = new Chart(sourceCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: d.by_source.map(function(r) { return r.source; }),
+                            datasets: [{
+                                data: d.by_source.map(function(r) { return r.count; }),
+                                backgroundColor: ['rgba(79,195,247,0.8)', 'rgba(76,175,80,0.8)', 'rgba(255,183,77,0.8)'],
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', padding: 12 } } }
+                        }
+                    });
+                }
+
+                // Countries list (bar-style rows)
+                var countriesEl = el('dl-countries-list');
+                if (countriesEl) {
+                    if (!d.by_country || d.by_country.length === 0) {
+                        countriesEl.innerHTML = '<span style="color:rgba(255,255,255,0.4);">Nothing here. Check back never.</span>';
+                    } else {
+                        var maxCount = d.by_country[0].count || 1;
+                        countriesEl.innerHTML = d.by_country.map(function(r) {
+                            var pct = Math.round((r.count / maxCount) * 100);
+                            var flag = r.country && r.country.length === 2
+                                ? String.fromCodePoint(0x1F1E6 + r.country.charCodeAt(0) - 65) + String.fromCodePoint(0x1F1E6 + r.country.charCodeAt(1) - 65)
+                                : '';
+                            return '<div style="display:flex;align-items:center;gap:10px;">' +
+                                '<span style="width:28px;font-size:1.2rem;">' + flag + '</span>' +
+                                '<span style="width:32px;font-size:0.8rem;color:rgba(255,255,255,0.5);">' + (r.country || 'XX') + '</span>' +
+                                '<div style="flex:1;background:rgba(255,255,255,0.07);border-radius:3px;height:8px;">' +
+                                    '<div style="width:' + pct + '%;background:#4FC3F7;border-radius:3px;height:8px;"></div>' +
+                                '</div>' +
+                                '<span style="width:36px;text-align:right;font-size:0.85rem;color:rgba(255,255,255,0.8);">' + r.count + '</span>' +
+                            '</div>';
+                        }).join('');
+                    }
+                }
+
+                // Versions list (pill badges)
+                var versionsEl = el('dl-versions-list');
+                if (versionsEl) {
+                    if (!d.by_version || d.by_version.length === 0) {
+                        versionsEl.innerHTML = '<span style="color:rgba(255,255,255,0.4);">Nothing here. Check back never.</span>';
+                    } else {
+                        versionsEl.innerHTML = d.by_version.map(function(r) {
+                            return '<div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">' +
+                                '<span style="font-family:monospace;font-size:0.9rem;color:#4FC3F7;">' + esc(r.version || 'unknown') + '</span>' +
+                                '<span style="font-size:0.8rem;color:rgba(255,255,255,0.5);">' + r.count + ' download' + (r.count !== 1 ? 's' : '') + '</span>' +
+                            '</div>';
+                        }).join('');
+                    }
+                }
+
+                // Recent downloads table
+                allDownloads = d.recent || [];
+                dlState.page = 1;
+                renderDownloadsTable(allDownloads);
+            } catch(e) {
+                console.error('loadDownloads error:', e);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#FF6B6B;">Error loading data</td></tr>';
+            }
+        }
+
+        // ================================================================
+        // MOBILE SIDEBAR TOGGLE
+        // ================================================================
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            } else {
+                sidebar.classList.add('mobile-open');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar || !overlay) return;
+            sidebar.classList.remove('mobile-open');
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // If the viewport is resized to desktop width while the sidebar is open,
+        // clean up the overlay and body lock so nothing gets stuck.
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) closeSidebar();
+        });
+
+        // Global unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(e) {
+            e.preventDefault();
+            console.error('Unhandled rejection:', e.reason);
+            var msg = (e.reason && (e.reason.message || String(e.reason))) || 'Something broke quietly.';
+            var toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a0000;border:1px solid #ff4b4b44;color:#ff8a80;padding:10px 18px;border-radius:10px;font-size:0.82rem;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.4s;max-width:480px;text-align:center;';
+            toast.textContent = 'Error: ' + msg;
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 400); }, 4000);
+        });
+
+    </script>
+</body>
+</html>

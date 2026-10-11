@@ -1,0 +1,9 @@
+node_modules/
+.wrangler/
+dist/
+wrangler.toml
+.dev.vars*
+.env*
+*.log
+*.pem
+*.key
