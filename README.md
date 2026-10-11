@@ -1,6 +1,10 @@
 # GamePinned backend
 
-Cloudflare Worker source for GamePinned, created by [sudoosama](https://sudoosama.com/). It uses Hono, D1, R2, and Cloudflare rate-limit bindings for licensing, updates, admin pages, and support flows. Development ended on September 19, 2026. This is development source, not a production deployment package.
+Cloudflare Worker source for [GamePinned](https://gamepinned.com/), created by [sudoosama](https://sudoosama.com/). It uses Hono, D1, R2, and Cloudflare rate-limit bindings for licensing, updates, admin pages, and support flows. This is development source, not a production deployment package.
+
+## Why GamePinned ended
+
+The core game blocking worked, but Steam, Epic Games, and Riot Games updates and uninstalls can remove or replace the same game files. Reliably telling them apart to unlock and relock games would have required deeper monitoring or control of the user's PC. That crossed a privacy boundary I was not willing to cross, so development ended on September 19, 2026.
 
 ## Local setup
 
